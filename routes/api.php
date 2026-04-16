@@ -40,8 +40,8 @@ Route::prefix('profile')->group(function () {
     Route::get('/plans',[PlanController::class,'index']);
     Route::get('/plans/{plan}',[PlanController::class,'show']);
     // auth users kichofo
-    Route::get('/memeberships',[MembershipController::class,'index']);
-    Route::get('/memeberships/{membership}',[MembershipController::class,'show']);
+    Route::get('/memberships',[MembershipController::class,'index']);
+    Route::get('/memberships/{membership}',[MembershipController::class,'show']);
 
     // auth attendance kichof
     Route::prefix('attendance')->group(function(){

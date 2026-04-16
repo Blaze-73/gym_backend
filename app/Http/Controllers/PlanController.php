@@ -12,8 +12,9 @@ class PlanController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-            return response()->json(Plan::all());
+    {return response()->json(Plan::all());
+            return response()->json(['status' => 'ok']);
+            
     }
 
     /**
