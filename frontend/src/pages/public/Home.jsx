@@ -93,77 +93,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black/95 backdrop-blur-md border-b border-white/5' : 'bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-black font-headline text-white tracking-widest">ALIEN</span>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(link, e)}
-                  className="text-sm font-headline text-gray-400 hover:text-primary-fixed transition-colors uppercase tracking-wider cursor-pointer"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-
-            <div className="hidden md:flex items-center gap-4">
-              <Link to="/login" className="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-headline hover:bg-white/10 transition-colors">
-                Login
-              </Link>
-              <Link to="/register" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
-                Sign In
-              </Link>
-            </div>
-
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-white">
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }} 
-              animate={{ opacity: 1, height: 'auto' }} 
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-black border-b border-white/5"
-            >
-              <div className="px-4 py-6 space-y-4">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={(e) => {
-                      handleNavClick(link, e);
-                      setIsMenuOpen(false);
-                    }}
-                    className="block text-base font-headline text-gray-400 hover:text-primary-fixed transition-colors uppercase tracking-wider py-2 cursor-pointer"
-                  >
-                    {link.name}
-                  </a>
-                ))}
-                <div className="pt-4 border-t border-white/5 space-y-3">
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block w-full px-6 py-3 bg-white/5 border border-white/10 rounded-full text-center">
-                    Login
-                  </Link>
-                  <Link to="/register" onClick={() => setIsMenuOpen(false)} className="block w-full px-6 py-3 bg-primary-fixed text-on-primary-fixed rounded-full text-center font-bold">
-                    Sign In
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+      {/* Navigation removed – using global Navbar component */}
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">

@@ -2,43 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /**
-     * Get user profile with memberships
-     */
-    public function show(Request $request)
+    public function show()
     {
-        $user = $request->user()->load([
-            'memberships' => function ($query) {
-                $query->with('plan')
-                      ->orderBy('created_at', 'desc');
-            }
-        ]);
-
-        return response()->json([
-            'user' => $user,
-            'active_memberships' => $user->memberships->where('status', 'active')->where('end_date', '>', now()),
-            'expired_memberships' => $user->memberships->where('end_date', '<=', now()),
-        ]);
+        $user = Auth::user();
+        return response()->json($user);
     }
 
-    /**
-     * Update user profile
-     */
     public function update(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'birth_date' => 'nullable|date',
+            'fitness_goal' => 'nullable|string',
+            'measurement_unit' => 'sometimes|required|in:metric,imperial',
+            'height_cm' => 'nullable|integer',
+            'weight_kg' => 'nullable|integer',
+            'avatar' => 'nullable|string',
         ]);
+
+        // Handle avatar upload if it's a file
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar
+            if ($user->avatar) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
+            }
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = Storage::url($avatarPath);
+        }
 
         $user->update($validated);
 
@@ -48,61 +49,55 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update password
-     */
     public function updatePassword(Request $request)
     {
-        $request->validate([
+        $user = Auth::user();
+
+        $validated = $request->validate([
             'current_password' => 'required',
-            'password' => ['required', 'confirmed', Password::min(8)],
+            'password' => 'required|min:8|confirmed',
         ]);
 
-        $user = $request->user();
-
-        // Check current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect'
-            ], 422);
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 400);
         }
 
-        // Update password
         $user->update([
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($validated['password']),
         ]);
 
+        return response()->json(['message' => 'Password updated successfully']);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'workout_reminders' => 'sometimes|boolean',
+            'nutrition_alerts' => 'sometimes|boolean',
+            'system_updates' => 'sometimes|boolean',
+        ]);
+
+        $user->update($validated);
+
         return response()->json([
-            'message' => 'Password updated successfully'
+            'message' => 'Settings updated successfully',
+            'user' => $user
         ]);
     }
 
-    /**
-     * Delete account
-     */
-    public function destroy(Request $request)
+    public function destroy()
     {
-        $request->validate([
-            'password' => 'required',
-        ]);
-
-        $user = $request->user();
-
-        // Verify password
-        if (!Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Password is incorrect'
-            ], 422);
+        $user = Auth::user();
+        
+        // Delete avatar if exists
+        if ($user->avatar) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
         }
 
-        // Delete user tokens
-        $user->tokens()->delete();
-
-        // Delete user
         $user->delete();
 
-        return response()->json([
-            'message' => 'Account deleted successfully'
-        ]);
+        return response()->json(['message' => 'Account deleted successfully']);
     }
 }

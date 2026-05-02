@@ -11,14 +11,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = localStorage.getItem('token');
-      if (storedToken) {
+      const storedUser = localStorage.getItem('user');
+
+      if (storedToken && storedUser) {
         try {
           const response = await authAPI.me();
           setUser(response.data);
           setToken(storedToken);
         } catch (error) {
+          console.error('Failed to authenticate:', error);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          setToken(null);
+          setUser(null);
         }
       }
       setLoading(false);
@@ -27,23 +32,42 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    const response = await authAPI.login(credentials);
-    const { token, user } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-    return response.data;
+    try {
+      console.log('🔐 Attempting login with:', credentials.email);
+      const response = await authAPI.login(credentials);
+      const { token, user } = response.data;
+
+      console.log('✅ Login successful:', user);
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      setToken(token);
+      setUser(user);
+
+      return response.data;
+    } catch (error) {
+      console.error('❌ Login failed:', error.response?.data);
+      throw error; // ✅ Re-throw so Login page can catch it
+    }
   };
 
   const register = async (data) => {
-    const response = await authAPI.register(data);
-    const { token, user } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-    return response.data;
+    try {
+      const response = await authAPI.register(data);
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      setToken(token);
+      setUser(user);
+
+      return response.data;
+    } catch (error) {
+      console.error('❌ Register failed:', error.response?.data);
+      throw error;
+    }
   };
 
   const logout = async () => {

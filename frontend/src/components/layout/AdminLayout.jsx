@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  LayoutDashboard, Users, Calendar, Dumbbell, Settings, 
-  Bell, Search, LogOut, Menu, X, Plus, ChevronDown, Package
+  LayoutDashboard, Users, Calendar, Package, Settings, 
+  Bell, Search, LogOut, Menu, X, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,20 +14,20 @@ const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Update the navItems in src/components/layout/AdminLayout.jsx
-
-const navItems = [
-  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/admin/members', label: 'Members', icon: Users },
-  { path: '/admin/schedule', label: 'Schedule', icon: Calendar },
-  { path: '/admin/products', label: 'Products', icon: Package },
-  { path: '/admin/settings', label: 'Settings', icon: Settings },
-];
-
+  const navItems = [
+    { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/members', label: 'Members', icon: Users },
+    { path: '/admin/schedule', label: 'Schedule', icon: Calendar },
+    { path: '/admin/products', label: 'Products', icon: Package },
+    { path: '/admin/settings', label: 'Settings', icon: Settings },
+  ];
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    if (window.confirm('Are you sure you want to logout?')) {
+      await logout();
+      // After logout, return to landing page
+      navigate('/');
+    }
   };
 
   if (loading) {
@@ -143,11 +143,31 @@ const navItems = [
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+            <button className="relative p-2 text-gray-400 hover:text-white">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary-fixed rounded-full"></span>
             </button>
-
+            {/* Dashboard shortcut for admin */}
+            <button
+              onClick={() => navigate('/admin')}
+              className="px-4 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform"
+            >
+              Dashboard
+            </button>
+            {/* Logout button for admin */}
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to logout?')) {
+                  logout();
+                  navigate('/');
+                }
+              }}
+              className="flex items-center gap-1 px-4 py-2 bg-error/10 text-error rounded-full hover:bg-error/20 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+            {/* User menu */}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -162,7 +182,6 @@ const navItems = [
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
-
               <AnimatePresence>
                 {showUserMenu && (
                   <motion.div
@@ -180,7 +199,7 @@ const navItems = [
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-2 text-sm text-error hover:bg-white/5 transition-colors text-left flex items-center gap-2"
+                      className="w-full px-4 py-2 text-sm text-error hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
                       Logout

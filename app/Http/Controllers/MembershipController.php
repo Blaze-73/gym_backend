@@ -49,7 +49,8 @@ class MembershipController extends Controller
         if(!$membership){
             return response()->json(['message' => 'Membership not found']);
         }
-    }
+        return response()->json($membership);
+    }   
 
     /**
      * Update the specified resource in storage.

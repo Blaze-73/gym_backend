@@ -87,19 +87,32 @@ const Plans = () => {
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
-              <Link to="/plans" className="text-sm font-headline text-primary-fixed transition-colors uppercase tracking-wider">Plans</Link>
-              <Link to="/#gym" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Visual</Link>
-              <Link to="/store" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Store</Link>
-              <Link to="/login" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Membership</Link>
+               <Link to="/plans" className="text-sm font-headline text-primary-fixed transition-colors uppercase tracking-wider">Plans</Link>
+               <Link to="/#gym" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Visual</Link>
+               <Link to="/store" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Store</Link>
+               {/* Show Dashboard for authenticated users, otherwise show Membership (login) */}
+               {isAuthenticated ? (
+                 <Link to="/programs" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Dashboard</Link>
+               ) : (
+                 <Link to="/login" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Membership</Link>
+               )}
             </div>
 
             <div className="flex items-center gap-4">
-              <Link to="/login" className="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-headline hover:bg-white/10 transition-colors">
-                Login
-              </Link>
-              <Link to="/register" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
-                Sign In
-              </Link>
+               {isAuthenticated ? (
+                 <Link to="/programs" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
+                   Dashboard
+                 </Link>
+               ) : (
+                 <>
+                   <Link to="/login" className="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-headline hover:bg-white/10 transition-colors">
+                     Login
+                   </Link>
+                   <Link to="/register" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
+                     Sign In
+                   </Link>
+                 </>
+               )}
             </div>
           </div>
         </div>

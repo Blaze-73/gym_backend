@@ -1,11 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   },
+  withCredentials: false,
 });
 
 // Request interceptor to add auth token
@@ -33,6 +35,7 @@ api.interceptors.response.use(
   }
 );
 
+// ============ AUTH ============
 export const authAPI = {
   login: (credentials) => api.post('/login', credentials),
   register: (data) => api.post('/register', data),
@@ -40,13 +43,14 @@ export const authAPI = {
   me: () => api.get('/me'),
 };
 
+// ============ PROFILE ============
 export const profileAPI = {
   get: () => api.get('/profile'),
   update: (data) => api.put('/profile', data),
   updatePassword: (data) => api.put('/profile/password', data),
-  delete: () => api.delete('/profile'),
 };
 
+// ============ PLANS ============
 export const plansAPI = {
   getAll: () => api.get('/plans'),
   getOne: (id) => api.get(`/plans/${id}`),
@@ -55,6 +59,7 @@ export const plansAPI = {
   delete: (id) => api.delete(`/plans/${id}`),
 };
 
+// ============ MEMBERSHIPS ============
 export const membershipsAPI = {
   getAll: () => api.get('/memberships'),
   getOne: (id) => api.get(`/memberships/${id}`),
@@ -63,22 +68,24 @@ export const membershipsAPI = {
   delete: (id) => api.delete(`/memberships/${id}`),
 };
 
-export const membersAPI = {
-  getAll: (params) => api.get('/members', { params }),
-  getOne: (id) => api.get(`/members/${id}`),
-  create: (data) => api.post('/members', data),
-  update: (id, data) => api.put(`/members/${id}`, data),
-  delete: (id) => api.delete(`/members/${id}`),
-  bulkAction: (data) => api.post('/members/bulk', data),
+// ============ USERS ============
+export const usersAPI = {
+  getAll: (params) => api.get('/users', { params }),
+  getOne: (id) => api.get(`/users/${id}`),
+  create: (data) => api.post('/users', data),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
 };
 
+// ============ ATTENDANCE ============
 export const attendanceAPI = {
   getActive: () => api.get('/attendance/active'),
   history: () => api.get('/attendance/history'),
-  checkIn: (userId) => api.post('/attendance/check-in', { user_id: userId }),
-  checkOut: (userId) => api.post('/attendance/check-out', { user_id: userId }),
+  checkIn: () => api.post('/attendance/check-in'),
+  checkOut: () => api.post('/attendance/check-out'),
 };
 
+// ============ PRODUCTS ============
 export const productsAPI = {
   getAll: () => api.get('/products'),
   getOne: (id) => api.get(`/products/${id}`),
@@ -88,6 +95,7 @@ export const productsAPI = {
   updateStock: (id, data) => api.put(`/products/${id}/stock`, data),
 };
 
+// ============ CATEGORIES ============
 export const categoriesAPI = {
   getAll: () => api.get('/categories'),
   create: (data) => api.post('/categories', data),
@@ -95,6 +103,7 @@ export const categoriesAPI = {
   delete: (id) => api.delete(`/categories/${id}`),
 };
 
+// ============ ORDERS ============
 export const ordersAPI = {
   getAll: () => api.get('/orders'),
   getOne: (id) => api.get(`/orders/${id}`),
@@ -103,6 +112,7 @@ export const ordersAPI = {
   statistics: () => api.get('/orders/statistics'),
 };
 
+// ============ DASHBOARD ============
 export const dashboardAPI = {
   get: () => api.get('/dashboard'),
   trends: () => api.get('/dashboard/trends'),

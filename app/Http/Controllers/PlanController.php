@@ -11,19 +11,21 @@ class PlanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {return response()->json(Plan::all());
-            return response()->json(['status' => 'ok']);
-            
-    }
-
+   public function index()
+{
+    return response()->json(Plan::all());
+}
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
+  public function store(StorePlanRequest $request)
+{
+    $plan = Plan::create($request->validated());
+    return response()->json([
+        'message' => 'Plan created successfully',
+        'data' => $plan
+    ], 201);
+}
 
     /**
      * Display the specified resource.
