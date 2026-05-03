@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { Check, Star, Zap, Crown, ArrowRight, Shield, Clock, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,46 +78,9 @@ const Plans = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl font-black font-headline text-white tracking-widest">ALIEN</span>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-8">
-               <Link to="/plans" className="text-sm font-headline text-primary-fixed transition-colors uppercase tracking-wider">Plans</Link>
-               <Link to="/#gym" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Visual</Link>
-               <Link to="/store" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Store</Link>
-               {/* Show Dashboard for authenticated users, otherwise show Membership (login) */}
-               {isAuthenticated ? (
-                 <Link to="/programs" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Dashboard</Link>
-               ) : (
-                 <Link to="/login" className="text-sm font-headline text-gray-400 hover:text-white transition-colors uppercase tracking-wider">Membership</Link>
-               )}
-            </div>
-
-            <div className="flex items-center gap-4">
-               {isAuthenticated ? (
-                 <Link to="/programs" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
-                   Dashboard
-                 </Link>
-               ) : (
-                 <>
-                   <Link to="/login" className="px-6 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-headline hover:bg-white/10 transition-colors">
-                     Login
-                   </Link>
-                   <Link to="/register" className="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold hover:scale-105 transition-transform">
-                     Sign In
-                   </Link>
-                 </>
-               )}
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-white pt-20">
+      {/* Use global Navbar for consistent navigation and logout */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">

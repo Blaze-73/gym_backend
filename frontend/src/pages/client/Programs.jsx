@@ -85,7 +85,7 @@ const Programs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pt-20">
       {/* Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}

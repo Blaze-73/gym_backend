@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ const Navbar = () => {
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const { cart, setIsCartOpen } = useCart();
+  const location = useLocation();
 
   // FIX: Safely calculate cart count
   const cartCount = cart ? cart.reduce((acc, item) => acc + item.quantity, 0) : 0;
@@ -17,12 +18,16 @@ const Navbar = () => {
   // Base navigation links (visible to unauthenticated users)
   // Base navigation links (visible to all users). Added Plans link to ensure at least 4 options.
   // Base navigation links (visible to all users). Added Membership link to ensure at least 4 options.
+  // Base navigation links visible to all users (except Membership, which is only for unauthenticated users)
   const baseLinks = [
     { to: '/plans', label: 'Plans' },
     { to: '/#gym', label: 'Visual' },
     { to: '/store', label: 'Store' },
-    { to: '/login', label: 'Membership' },
   ];
+  // Show Membership link only on the Home page for unauthenticated users
+  if (!isAuthenticated && location.pathname === '/') {
+    baseLinks.push({ to: '/login', label: 'Membership' });
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
@@ -147,15 +152,29 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <div className="pt-4 border-t border-white/5 space-y-3">
+          <div className="pt-4 border-t border-white/5 space-y-3">
               {isAuthenticated ? (
-                <Link
-                  to={isAdmin() ? '/admin' : '/programs'}
-                  onClick={() => setIsOpen(false)}
-                  className="block px-5 py-3 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold text-center"
-                >
-                  {isAdmin() ? 'Admin Dashboard' : 'Client Dashboard'}
-                </Link>
+                <>
+                  <Link
+                    to={isAdmin() ? '/admin' : '/programs'}
+                    onClick={() => setIsOpen(false)}
+                    className="block px-5 py-3 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-headline font-bold text-center"
+                  >
+                    {isAdmin() ? 'Admin Dashboard' : 'Client Dashboard'}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to logout?')) {
+                        logout();
+                        navigate('/');
+                        setIsOpen(false);
+                      }
+                    }}
+                    className="block w-full text-left px-5 py-3 bg-error/10 text-error rounded-full text-sm font-headline font-bold text-center"
+                  >
+                    Logout
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
