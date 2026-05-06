@@ -7,18 +7,34 @@ const Workout = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [workout, setWorkout] = useState(null);
+  // List of available protocols (programs) for selection
+  const [protocols, setProtocols] = useState([]);
+  const [selectedProtocol, setSelectedProtocol] = useState('');
   const [currentExercise, setCurrentExercise] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [completedExercises, setCompletedExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Initial data load: fetch workout by URL id (if present) and load protocols list
   useEffect(() => {
+    // Load protocols (programs) for the dropdown
+    const fetchProtocols = async () => {
+      try {
+        const response = await fetch('/api/programs');
+        const data = await response.json();
+        setProtocols(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch protocols:', err);
+      }
+    };
+
+    fetchProtocols();
+
     if (id) {
       fetchWorkout();
     } else {
-      // No workout ID, show message or redirect
-      setError('No workout selected');
+      // No workout ID – allow user to select a protocol
       setLoading(false);
     }
 
@@ -29,10 +45,10 @@ const Workout = () => {
     return () => clearInterval(timer);
   }, [id]);
 
-  const fetchWorkout = async () => {
+  const fetchWorkout = async (workoutId = id) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/workouts/${id}`, {
+      const response = await fetch(`/api/workouts/${workoutId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -50,6 +66,38 @@ const Workout = () => {
       setError('Failed to load workout');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load a protocol (program) and start its first workout
+  const loadProtocol = async () => {
+    if (!selectedProtocol) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/programs/${selectedProtocol}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Program not found');
+      const program = await response.json();
+      // Assume program.workouts is an array; pick the first workout id
+      const firstWorkoutId = program.workouts?.[0]?.id;
+      if (firstWorkoutId) {
+        // Reset state for new workout
+        setCurrentExercise(0);
+        setCompletedExercises([]);
+        setElapsedTime(0);
+        setLoading(true);
+        setError(null);
+        fetchWorkout(firstWorkoutId);
+      } else {
+        setError('Selected protocol has no workouts');
+      }
+    } catch (err) {
+      console.error('Failed to load protocol:', err);
+      setError('Failed to load protocol');
     }
   };
 
@@ -80,26 +128,56 @@ const Workout = () => {
     );
   }
 
-  if (error || !workout) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-headline font-bold text-white mb-4">No Workout Selected</h2>
-          <p className="text-gray-400 mb-6">Please select a workout from your programs</p>
-          <button
-            onClick={() => navigate('/programs')}
-            className="px-6 py-3 bg-primary-fixed text-on-primary-fixed rounded-lg font-headline font-bold"
-          >
-            Back to Programs
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Show an error banner if something went wrong, but still render the page so the user can pick a protocol
+  const errorBanner = error ? (
+    <div className="bg-red-900/80 text-white p-4 rounded mb-4">
+      <p>{error}</p>
+    </div>
+  ) : null;
 
   const progress = workout?.exercises?.length > 0
     ? (completedExercises.length / workout.exercises.length) * 100
     : 0;
+
+  // If no workout data is loaded yet (no id and no protocol selected), show a friendly placeholder with protocol selector
+  if (!workout) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
+        {errorBanner}
+        <div className="text-center mb-8">
+          <Dumbbell className="w-20 h-20 text-primary-fixed mx-auto mb-6" />
+            <h2 className="text-3xl font-black font-headline uppercase italic mb-4">Ready to Train?</h2>
+            <p className="text-gray-400 text-center max-w-md">
+              Choose your training program below and let's crush your goals together!
+            </p>
+</div>
+{/* Protocol selector and load button */}
+<div className="flex flex-col sm:flex-row items-center gap-4">
+  <select
+    value={selectedProtocol}
+    onChange={(e) => setSelectedProtocol(e.target.value)}
+    className="bg-surface-container-high text-white rounded-xl px-4 py-3 min-w-[250px] border border-white/5 focus:border-primary-fixed focus:outline-none"
+  >
+    <option value="">Select Training Program</option>
+    {protocols.map((p) => (
+      <option key={p.id} value={p.id}>
+        {p.name}
+      </option>
+    ))}
+  </select>
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={loadProtocol}
+    disabled={!selectedProtocol}
+    className="px-6 py-3 bg-primary-fixed text-on-primary-fixed rounded-xl font-headline font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Begin Workout
+  </motion.button>
+</div>
+</div>
+);
+}
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -120,6 +198,26 @@ const Workout = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Protocol selector */}
+              <select
+                value={selectedProtocol}
+                onChange={(e) => setSelectedProtocol(e.target.value)}
+                className="bg-surface-container-high text-white rounded px-3 py-2"
+              >
+            <option value="">Switch Program</option>
+            {protocols.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={loadProtocol}
+            disabled={!selectedProtocol}
+            className="px-4 py-2 bg-primary-fixed text-on-primary-fixed rounded hover:bg-primary-fixed/90 transition-colors"
+          >
+            Switch
+          </button>
               <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full">
                 <Clock className="w-4 h-4 text-primary-fixed" />
                 <span className="font-mono font-bold">{formatTime(elapsedTime)}</span>
@@ -167,17 +265,17 @@ const Workout = () => {
               <div className="bg-surface-container-high border border-white/5 rounded-2xl overflow-hidden">
                 {/* Exercise Image */}
                 <div className="relative aspect-video bg-surface-container-highest">
-                  {workout.exercises[currentExercise].image ? (
-                    <img
-                      src={workout.exercises[currentExercise].image}
-                      alt={workout.exercises[currentExercise].name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Dumbbell className="w-24 h-24 text-gray-600" />
-                    </div>
-                  )}
+                    {workout.exercises[currentExercise].image ? (
+                      <img
+                        src={workout.exercises[currentExercise].image}
+                        alt={workout.exercises[currentExercise].name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Dumbbell className="w-24 h-24 text-gray-600" />
+                      </div>
+                    )}
                 </div>
 
                 {/* Exercise Info */}

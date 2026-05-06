@@ -31,6 +31,8 @@ import Workout from '@/pages/client/Workout';
 import Nutrition from '@/pages/client/Nutrition';
 import Coaches from '@/pages/client/Coaches';
 import Settings from '@/pages/client/Settings';
+import NewWorkout from '@/pages/client/NewWorkout';
+import NewProgram from '@/pages/client/NewProgram';
 
 function AppRoutes() {
   const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -70,11 +72,14 @@ function AppRoutes() {
       <Route path="/programs" element={<ProtectedRoute requireNonAdmin />}> 
         <Route element={<ClientLayout />}> 
           <Route index element={<Programs />} />
+          <Route path="new" element={<NewProgram />} />
         </Route>
       </Route>
       <Route path="/workout/*" element={<ProtectedRoute requireNonAdmin />}> 
         <Route element={<ClientLayout />}> 
           <Route index element={<Workout />} />
+          <Route path="new" element={<NewWorkout />} />
+          {/* Preserve existing wildcard to handle workout IDs */}
           <Route path="*" element={<Workout />} />
         </Route>
       </Route>

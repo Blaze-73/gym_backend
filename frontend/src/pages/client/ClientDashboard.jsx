@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Dumbbell, Calendar, Utensils, Users, TrendingUp, Activity, Clock, Award } from 'lucide-react';
+import { Dumbbell, Calendar, Utensils, Users, TrendingUp, Activity, Clock, Award, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -63,8 +63,8 @@ const ClientDashboard = () => {
 
   const quickActions = [
     { title: 'Start Workout', icon: Dumbbell, link: '/workout', color: 'text-primary-fixed' },
-    { title: 'View Programs', icon: Calendar, link: '/programs', color: 'text-blue-400' },
-    { title: 'Track Nutrition', icon: Utensils, link: '/nutrition', color: 'text-green-400' },
+    { title: 'My Programs', icon: Calendar, link: '/programs', color: 'text-blue-400' },
+    { title: 'Nutrition', icon: Utensils, link: '/nutrition', color: 'text-green-400' },
     { title: 'Find Coach', icon: Users, link: '/coaches', color: 'text-purple-400' },
   ];
 
@@ -81,28 +81,41 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Welcome Header */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="bg-gradient-to-r from-primary-fixed/10 to-surface-container-high border-b border-white/5"
-      >
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">Welcome Back</p>
-            <h1 className="text-5xl font-black font-headline text-white uppercase italic">
-              {user?.name?.split(' ')[0] || 'Athlete'}
-            </h1>
-            <p className="text-xl text-gray-400 mt-4">Ready to crush your goals today?</p>
-          </motion.div>
-        </div>
-      </motion.header>
+  <div className="min-h-screen bg-black text-white">
+    {/* Hero Section with background image for visual appeal */}
+    <section
+      className="relative h-64 bg-cover bg-center"
+      style={{ backgroundImage: "url('/images/dashboard-hero.jpg')" }}
+      aria-label="Dashboard hero image"
+    >
+      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <p className="text-sm text-gray-300 uppercase tracking-wider mb-2">Welcome Back</p>
+          <h1 className="text-4xl font-black font-headline text-white uppercase italic">
+            {user?.name?.split(' ')[0] || 'Athlete'}
+          </h1>
+            <p className="text-lg text-gray-300 mt-2">Let's push your limits and achieve greatness together!</p>
+        </motion.div>
+      </div>
+    </section>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    {/* Stats Header */}
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="bg-gradient-to-r from-primary-fixed/10 to-surface-container-high border-b border-white/5"
+    >
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Stats Grid */}
+      </div>
+    </motion.header>
+
+    {/* Main content container */}
+    <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Grid */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -190,7 +203,8 @@ const ClientDashboard = () => {
                     </div>
                   </div>
 
-                  <Link to={`/workout`}>
+                    {/* If there is an active program with workouts, link directly to the first workout; otherwise fallback to programs list */}
+                    <Link to={activeProgram?.program?.workouts?.[0]?.id ? `/workout/${activeProgram.program.workouts[0].id}` : '/programs'}>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}

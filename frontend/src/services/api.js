@@ -1,13 +1,15 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  // Use relative base URL so Vite proxy forwards requests to Laravel backend
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
   },
-  withCredentials: false,
+  // Enable sending cookies for Sanctum authentication
+  withCredentials: true,
 });
 
 // Request interceptor to add auth token
