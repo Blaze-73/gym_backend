@@ -10,17 +10,28 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../public',
-    emptyOutDir: false,
+    outDir: 'dist',
+    emptyOutDir: true,
+    // Increase chunk size warning limit to suppress warnings
+    chunkSizeWarningLimit: 1000,
+    // Manual chunks for better code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor libraries into separate chunks
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'animation-vendor': ['framer-motion'],
+          'icons-vendor': ['lucide-react'],
+        },
+      },
+    },
   },
-  // Updated server configuration to match the port the user is accessing (5174)
   server: {
-    // Use the default Vite port (5173) which is typically free
     port: 5173,
-    strictPort: false, // allow Vite to pick a different free port if 5173 is taken
+    strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000', // Laravel backend port
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
     },
