@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { Check, Star, Zap, Crown, ArrowRight, Shield, Clock, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -79,37 +78,16 @@ const Plans = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-20">
-      {/* Use global Navbar for consistent navigation and logout */}
-      <Navbar />
-
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-          >
-            <span className="text-primary-fixed text-lg font-headline uppercase tracking-widest">
-              Build Power
-            </span>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4" >
+            <span className="text-primary-fixed text-lg font-headline uppercase tracking-widest"> Build Power </span>
           </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black font-headline mb-6"
-          >
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-7xl font-black font-headline mb-6" >
             CHOOSE YOUR <span className="text-primary-fixed">LEVEL.</span>
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-gray-400 text-lg max-w-2xl mx-auto"
-          >
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-gray-400 text-lg max-w-2xl mx-auto" >
             Unlock your alien potential with our premium membership plans. No excuses, just results.
           </motion.p>
         </div>
@@ -126,9 +104,7 @@ const Plans = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className={`relative bg-surface-container-high border rounded-2xl p-8 flex flex-col ${
-                  plan.popular
-                    ? 'border-primary-fixed shadow-2xl shadow-primary-fixed/20 scale-105'
-                    : 'border-white/5'
+                  plan.popular ? 'border-primary-fixed shadow-2xl shadow-primary-fixed/20 scale-105' : 'border-white/5'
                 }`}
               >
                 {plan.popular && (
@@ -136,25 +112,18 @@ const Plans = () => {
                     Best Value
                   </div>
                 )}
-
                 {plan.savings && (
                   <div className="text-center mb-4">
-                    <span className="text-xs text-primary-fixed font-headline uppercase tracking-wider">
-                      {plan.savings}
-                    </span>
+                    <span className="text-xs text-primary-fixed font-headline uppercase tracking-wider"> {plan.savings} </span>
                   </div>
                 )}
-
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-headline font-bold text-white uppercase mb-4">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-2xl font-headline font-bold text-white uppercase mb-4"> {plan.name} </h3>
                   <div className="flex items-baseline justify-center">
                     <span className="text-5xl font-black font-headline text-white">${plan.price}</span>
                     <span className="text-gray-400 ml-2">{plan.period}</span>
                   </div>
                 </div>
-
                 <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-3">
@@ -165,13 +134,10 @@ const Plans = () => {
                     </li>
                   ))}
                 </ul>
-
                 <button
                   onClick={() => handleJoinPlan(plan)}
                   className={`w-full py-4 font-headline font-bold text-sm uppercase tracking-widest rounded-full transition-all ${
-                    plan.popular
-                      ? 'bg-primary-fixed text-on-primary-fixed hover:scale-105'
-                      : 'bg-surface-container-highest text-white hover:bg-white/10'
+                    plan.popular ? 'bg-primary-fixed text-on-primary-fixed hover:scale-105' : 'bg-surface-container-highest text-white hover:bg-white/10'
                   }`}
                 >
                   JOIN NOW
@@ -199,12 +165,7 @@ const Plans = () => {
       <section className="py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
+            <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative" >
               <div className="absolute inset-0 bg-primary-fixed/10 rounded-3xl blur-3xl"></div>
               <img
                 src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80"
@@ -212,12 +173,7 @@ const Plans = () => {
                 className="relative rounded-3xl w-full object-cover"
               />
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} >
               <h2 className="text-4xl md:text-5xl font-black font-headline mb-6">
                 WELCOME TO OUR <span className="text-primary-fixed">GYM</span>
               </h2>
@@ -227,12 +183,8 @@ const Plans = () => {
               <p className="text-gray-400 text-base leading-relaxed mb-8">
                 Our facility is equipped with state-of-the-art bio-mechanic machines and expert coaches ready to push your boundaries. Join the elite. Become Alien.
               </p>
-              <Link
-                to="/#gym"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-fixed text-on-primary-fixed font-headline font-bold text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-all"
-              >
-                EXPLORE MORE
-                <ArrowRight className="w-5 h-5" />
+              <Link to="/#gym" className="inline-flex items-center gap-2 px-6 py-3 bg-primary-fixed text-on-primary-fixed font-headline font-bold text-sm uppercase tracking-widest rounded-full hover:scale-105 transition-all" >
+                EXPLORE MORE <ArrowRight className="w-5 h-5" />
               </Link>
             </motion.div>
           </div>
@@ -240,12 +192,7 @@ const Plans = () => {
       </section>
 
       {/* Membership Request Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Confirm Membership Request"
-        size="md"
-      >
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Confirm Membership Request" size="md" >
         {selectedPlan && (
           <div className="space-y-6">
             <div className="bg-surface-container-highest rounded-xl p-6">
@@ -259,7 +206,6 @@ const Plans = () => {
                   <p className="text-gray-400 text-xs">{selectedPlan.period}</p>
                 </div>
               </div>
-
               <div className="space-y-2">
                 {selectedPlan.features.slice(0, 4).map((feature, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
@@ -272,34 +218,22 @@ const Plans = () => {
                 )}
               </div>
             </div>
-
             <div className="bg-primary-fixed/10 border border-primary-fixed/20 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-primary-fixed flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-headline font-bold text-primary-fixed mb-1">
-                    Admin Approval Required
-                  </p>
+                  <p className="text-sm font-headline font-bold text-primary-fixed mb-1"> Admin Approval Required </p>
                   <p className="text-xs text-gray-400">
                     Your membership request will be sent to our admin team for verification. You'll receive an email within 24-48 hours with confirmation.
                   </p>
                 </div>
               </div>
             </div>
-
             <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                onClick={() => setShowModal(false)}
-                className="flex-1"
-              >
+              <Button variant="secondary" onClick={() => setShowModal(false)} className="flex-1" >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleConfirmRequest}
-                className="flex-1"
-              >
+              <Button variant="primary" onClick={handleConfirmRequest} className="flex-1" >
                 Submit Request
               </Button>
             </div>

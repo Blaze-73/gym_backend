@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ScrollToTop from '@/components/ScrollToTop';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { CartProvider } from '@/components/products/Cart';
+import { CartProvider } from '@/contexts/CartContext'; // ✅ Fixed: was importing from wrong path
 
 // Layout Components
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import PublicLayout from '@/components/layout/PublicLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
 import ClientLayout from '@/components/layout/ClientLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -48,58 +48,103 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Home />} />
-      {/* Render Login page regardless of authentication to avoid redirect loops */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to={isAdmin() ? "/admin" : "/programs"} /> : <Register />} />
-      <Route path="/store" element={<Store />} />
-      <Route path="/plans" element={<Plans />} />
-      <Route path="/products/:id" element={<ProductDetail />} />
-
-      {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute requireAdmin />}> 
-        <Route element={<AdminLayout />}> 
-          <Route index element={<AdminDashboard />} />
-          <Route path="members" element={<AdminMembers />} />
-          <Route path="schedule" element={<AdminSchedule />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="products/add" element={<AdminAddProduct />} />
-          <Route path="settings" element={<AdminSettings />} />
-        </Route>
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/login"
+          element={
+            isAuthenticated
+              ? <Navigate to={isAdmin() ? '/admin' : '/programs'} replace />
+              : <Login />
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            isAuthenticated
+              ? <Navigate to={isAdmin() ? '/admin' : '/programs'} replace />
+              : <Register />
+          }
+        />
+        <Route path="/store" element={<Store />} />
+        <Route path="/plans" element={<Plans />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
       </Route>
 
-      {/* Client Routes – only for non‑admin authenticated users */}
-      <Route path="/programs" element={<ProtectedRoute requireNonAdmin />}> 
-        <Route element={<ClientLayout />}> 
-          <Route index element={<Programs />} />
-          <Route path="new" element={<NewProgram />} />
-        </Route>
+      {/* Admin Routes - AdminLayout uses <Outlet /> for nested content */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="members" element={<AdminMembers />} />
+        <Route path="schedule" element={<AdminSchedule />} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="products/add" element={<AdminAddProduct />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
-      <Route path="/workout/*" element={<ProtectedRoute requireNonAdmin />}> 
-        <Route element={<ClientLayout />}> 
-          <Route index element={<Workout />} />
-          <Route path="new" element={<NewWorkout />} />
-          {/* Preserve existing wildcard to handle workout IDs */}
-          <Route path="*" element={<Workout />} />
-        </Route>
+
+      {/* Client Routes */}
+      <Route
+        path="/programs"
+        element={
+          <ProtectedRoute requireNonAdmin>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Programs />} />
+        <Route path="new" element={<NewProgram />} />
       </Route>
-      <Route path="/nutrition/*" element={<ProtectedRoute requireNonAdmin />}> 
-        <Route element={<ClientLayout />}> 
-          <Route index element={<Nutrition />} />
-          <Route path="*" element={<Nutrition />} />
-        </Route>
+
+      <Route
+        path="/workout"
+        element={
+          <ProtectedRoute requireNonAdmin>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Workout />} />
+        <Route path="new" element={<NewWorkout />} />
+        <Route path=":id" element={<Workout />} />
       </Route>
-      <Route path="/coaches/*" element={<ProtectedRoute requireNonAdmin />}> 
-        <Route element={<ClientLayout />}> 
-          <Route index element={<Coaches />} />
-          <Route path="*" element={<Coaches />} />
-        </Route>
+
+      <Route
+        path="/nutrition"
+        element={
+          <ProtectedRoute requireNonAdmin>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Nutrition />} />
       </Route>
-      <Route path="/settings/*" element={<ProtectedRoute requireNonAdmin />}> 
-        <Route element={<ClientLayout />}> 
-          <Route index element={<Settings />} />
-          <Route path="*" element={<Settings />} />
-        </Route>
+
+      <Route
+        path="/coaches"
+        element={
+          <ProtectedRoute requireNonAdmin>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Coaches />} />
+      </Route>
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute requireNonAdmin>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Settings />} />
       </Route>
 
       {/* Redirects */}
@@ -116,12 +161,10 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <CartProvider>
-          {/* Global navigation and footer */}
-          <Navbar />
           <AppRoutes />
-          <Footer />
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -403,12 +403,12 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* Save Button */}
+        {/* Save Button - Fixed Position for Mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="sticky bottom-8 mt-8 flex items-center justify-end gap-4"
+          className="sticky bottom-0 lg:static lg:mt-8 flex items-center justify-end gap-4 pt-8"
         >
           <button className="px-6 py-3 bg-surface-container-highest border border-white/10 text-white font-headline font-bold uppercase rounded-xl hover:bg-white/5 transition-colors">
             Discard

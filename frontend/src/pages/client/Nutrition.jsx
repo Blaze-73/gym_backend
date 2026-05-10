@@ -29,29 +29,43 @@ const Nutrition = () => {
       const token = localStorage.getItem('token');
       const today = new Date().toISOString().split('T')[0];
       
-      const response = await fetch(`/api/nutrition/${today}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setNutritionLog(data);
-        setMeals(data.meals || []);
-        setTodayStats({
-          calories: data.calories || 0,
-          protein: data.protein_g || 0,
-          carbs: data.carbs_g || 0,
-          fats: data.fats_g || 0,
-          water: data.water_ml || 0,
-          targetCalories: data.target_calories || 2500,
-          targetProtein: data.target_protein_g || 180,
-          targetCarbs: data.target_carbs_g || 300,
-          targetFats: data.target_fats_g || 80,
-          targetWater: data.target_water_ml || 3000,
+        const response = await fetch(`/api/nutrition/${today}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
         });
-      }
+
+        if (response.ok) {
+          const data = await response.json();
+          setNutritionLog(data);
+          setMeals(data.meals || []);
+          setTodayStats({
+            calories: data.calories || 0,
+            protein: data.protein_g || 0,
+            carbs: data.carbs_g || 0,
+            fats: data.fats_g || 0,
+            water: data.water_ml || 0,
+            targetCalories: data.target_calories || 2500,
+            targetProtein: data.target_protein_g || 180,
+            targetCarbs: data.target_carbs_g || 300,
+            targetFats: data.target_fats_g || 80,
+            targetWater: data.target_water_ml || 3000,
+          });
+        } else if (response.status === 404) {
+          // No log for today – initialise empty state
+          setNutritionLog(null);
+          setMeals([]);
+          setTodayStats(prev => ({
+            ...prev,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fats: 0,
+            water: 0,
+          }));
+        } else {
+          console.error('Failed to fetch nutrition data:', response.status);
+        }
     } catch (error) {
       console.error('Failed to fetch nutrition:', error);
     } finally {

@@ -9,6 +9,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    outDir: '../public',
+    emptyOutDir: false,
+  },
   // Updated server configuration to match the port the user is accessing (5174)
   server: {
     // Use the default Vite port (5173) which is typically free

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productsAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star, Minus, Plus, Check } from 'lucide-react';
-import { useCart } from '@/components/products/Cart';
+import { useCart } from '@/contexts/CartContext'; // ✅ Fixed: was importing from @/components/products/Cart
 import Button from '@/components/common/Button';
 
 const ProductDetail = () => {
@@ -32,7 +32,9 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product);
+    }
     setAdded(true);
     setTimeout(() => {
       setAdded(false);
@@ -51,7 +53,7 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <Link
         to="/store"
         className="inline-flex items-center gap-2 text-on-surface-variant hover:text-white mb-8 transition-colors"
@@ -87,12 +89,9 @@ const ProductDetail = () => {
           className="flex flex-col"
         >
           <div className="mb-4">
-            <Link
-              to={`/store?category=${product.category_id}`}
-              className="text-[10px] text-on-surface-variant uppercase tracking-wider hover:text-primary-fixed transition-colors"
-            >
+            <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">
               {product.category?.name || 'Uncategorized'}
-            </Link>
+            </span>
             <h1 className="text-3xl font-black font-headline text-on-surface mt-2">{product.name}</h1>
           </div>
 
@@ -157,11 +156,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <Button
-                onClick={handleAddToCart}
-                className="w-full"
-                size="lg"
-              >
+              <Button onClick={handleAddToCart} className="w-full" size="lg">
                 {added ? (
                   <>
                     <Check className="w-5 h-5" />
@@ -191,7 +186,7 @@ const ProductDetail = () => {
           { title: 'Secure Payment', desc: '100% secure payment processing' },
           { title: 'Easy Returns', desc: '30-day return policy' },
         ].map((feature, i) => (
-          <div key={i} className="bg-surface-container-high border border-white/5 p-6">
+          <div key={i} className="bg-surface-container-high border border-white/5 p-6 rounded-lg">
             <h3 className="font-headline font-bold text-on-surface mb-2">{feature.title}</h3>
             <p className="text-on-surface-variant text-sm">{feature.desc}</p>
           </div>

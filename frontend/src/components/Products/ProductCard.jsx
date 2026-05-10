@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Star } from 'lucide-react';
 
+// ✅ Note: ProductCard receives onAddToCart as a prop - no direct cart import needed.
+// The parent component (Store, etc.) handles the cart logic.
+
 const ProductCard = ({ product, onAddToCart }) => {
   const { id, name, description, price, stock, image, category, rating = 0 } = product;
 
@@ -10,7 +13,7 @@ const ProductCard = ({ product, onAddToCart }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
-      className="bg-surface-container-high border border-white/5 overflow-hidden group"
+      className="bg-surface-container-high border border-white/5 overflow-hidden group rounded-xl"
     >
       <Link to={`/products/${id}`}>
         <div className="aspect-square overflow-hidden bg-surface-container-highest relative">
@@ -25,8 +28,8 @@ const ProductCard = ({ product, onAddToCart }) => {
               No Image
             </div>
           )}
-          
-          {!stock || stock === 0 && (
+
+          {(!stock || stock === 0) && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <span className="px-4 py-2 bg-error text-white text-xs font-headline font-bold uppercase rounded">
                 Out of Stock
@@ -48,7 +51,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           </p>
           <h3 className="font-headline font-bold text-on-surface line-clamp-1 mb-2">{name}</h3>
           <p className="text-on-surface-variant text-sm line-clamp-2 mb-4">{description}</p>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-xl font-black font-headline text-primary-fixed">
               ${price}
