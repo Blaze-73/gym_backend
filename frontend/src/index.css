@@ -1,9 +1,10 @@
+/* Import responsive styles */
+@import './styles/responsive.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import responsive styles */
-@import './styles/responsive.css';
+
 
 /* Custom CSS Variables */
 :root {
