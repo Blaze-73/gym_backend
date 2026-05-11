@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { productsAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star, Minus, Plus, Check } from 'lucide-react';
@@ -10,8 +11,10 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -23,15 +26,20 @@ const ProductDetail = () => {
     try {
       const response = await productsAPI.getOne(id);
       setProduct(response.data);
-    } catch (error) {
-      console.error('Failed to fetch product:', error);
-      navigate('/store');
+    } catch (err) {
+      console.error('Failed to fetch product:', err);
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      // Prompt unauthenticated users to log in before adding to cart.
+      navigate('/login');
+      return;
+    }
     for (let i = 0; i < quantity; i++) {
       addToCart(product);
     }
@@ -50,6 +58,17 @@ const ProductDetail = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
+        <h2 className="text-2xl font-bold mb-4 text-primary-fixed">Product not found</h2>
+        <p className="mb-6 text-on-surface-variant">We were unable to load the product details. It may have been removed or you may need to be logged in.</p>
+        <Link to="/store" className="px-4 py-2 bg-primary-fixed text-on-primary-fixed rounded">
+          Back to Store
+        </Link>
+      </div>
+    );
+  }
   if (!product) return null;
 
   return (

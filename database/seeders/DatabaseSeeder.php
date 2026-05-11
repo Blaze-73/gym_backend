@@ -11,9 +11,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       $this->call([
-        AdminSeeder::class,
-        PlanSeeder::class,
-       ]);
+        // Call all seeders, including newly added ones for demo data
+        $this->call([
+            AdminSeeder::class,
+            CategorySeeder::class,
+            PlanSeeder::class,
+            ProductSeeder::class,
+            CoachSeeder::class,
+            ExerciseSeeder::class,
+            WorkoutSeeder::class,
+            ProgramSeeder::class,
+            MealSeeder::class,
+            NutritionLogSeeder::class,
+        ]);
     }
 }

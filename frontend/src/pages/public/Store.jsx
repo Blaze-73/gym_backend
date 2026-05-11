@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { Search, ShoppingCart, Eye } from 'lucide-react';
 import { productsAPI, categoriesAPI } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import CartDrawer from '@/components/common/CartDrawer';
 
 // ✅ Fixed: Removed the hardcoded internal navbar.
 // Store lives inside PublicLayout which already renders UnifiedNavbar.
@@ -55,7 +58,15 @@ const Store = () => {
     currentPage * productsPerPage
   );
 
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   const handleAddToCart = (product) => {
+    if (!isAuthenticated) {
+      // Redirect unauthenticated users to login before they can add items to the cart.
+      navigate('/login');
+      return;
+    }
     addToCart(product);
     setIsCartOpen(true);
   };
@@ -256,6 +267,8 @@ const Store = () => {
           </main>
         </div>
       </div>
+      {/* Cart drawer attached to the page */}
+      <CartDrawer />
     </div>
   );
 };

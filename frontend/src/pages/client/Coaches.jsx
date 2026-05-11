@@ -69,11 +69,12 @@ const Coaches = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header Banner */}
-      <motion.header
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="relative h-[400px] overflow-hidden"
-      >
+        <motion.header
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          /* Responsive hero height: smaller on mobile, larger on desktop */
+          className="relative h-[200px] sm:h-[300px] lg:h-[400px] overflow-hidden"
+        >
         <div className="absolute inset-0 bg-gradient-to-b from-primary-fixed/20 to-black" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&q=80')] bg-cover bg-center opacity-30" />
         
@@ -126,7 +127,7 @@ const Coaches = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-16"
           >
-            <div className="grid lg:grid-cols-2 gap-0 bg-surface-container-high border border-white/5 rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-surface-container-high border border-white/5 rounded-2xl overflow-hidden">
               {/* Image */}
               <div className="relative aspect-video lg:aspect-auto">
                 {coaches[0].avatar ? (
@@ -200,17 +201,19 @@ const Coaches = () => {
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search coaches..."
-                className="bg-surface-container-high border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary-fixed/50 w-64"
-              />
+                <input
+                  type="text"
+                  placeholder="Search coaches..."
+                  // Full width on mobile, limited width on larger screens
+                  className="bg-surface-container-high border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary-fixed/50 w-full sm:w-64"
+                />
             </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-surface-container-high border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary-fixed/50"
-            >
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                // Full width on mobile, limited width on larger screens
+                className="bg-surface-container-high border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary-fixed/50 w-full sm:w-48"
+              >
               <option value="ranking">Sorted by: Ranking</option>
               <option value="experience">Sorted by: Experience</option>
               <option value="availability">Sorted by: Availability</option>
