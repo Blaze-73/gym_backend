@@ -8,7 +8,6 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { NotificationBell } from '@/components/common/NotificationDropdown';
-import CartDrawer from '@/components/common/CartDrawer';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',  path: '/programs'  },
@@ -19,7 +18,7 @@ const NAV_ITEMS = [
   { icon: Settings,        label: 'Settings',   path: '/settings'  },
 ];
 
-/* ── shared nav link with animated active bar ── */
+/* ── nav link with animated active bar ─────────────────────────── */
 const NavLink = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
   return (
@@ -27,7 +26,9 @@ const NavLink = ({ item, isActive, onClick }) => {
       to={item.path}
       onClick={onClick}
       className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
-        ${isActive ? 'bg-primary-fixed/10 text-primary-fixed' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+        ${isActive
+          ? 'bg-primary-fixed/10 text-primary-fixed'
+          : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
     >
       {isActive && (
         <motion.span
@@ -35,24 +36,37 @@ const NavLink = ({ item, isActive, onClick }) => {
           className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary-fixed"
         />
       )}
-      <Icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'text-primary-fixed' : 'group-hover:scale-110'}`} />
-      <span className="font-headline font-bold text-sm uppercase tracking-wider">{item.label}</span>
-      {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-fixed shadow-[0_0_6px_#daf900]" />}
+      <Icon
+        className={`w-5 h-5 flex-shrink-0 transition-transform duration-200
+          ${isActive ? 'text-primary-fixed' : 'group-hover:scale-110'}`}
+      />
+      <span className="font-headline font-bold text-sm uppercase tracking-wider">
+        {item.label}
+      </span>
+      {isActive && (
+        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-fixed shadow-[0_0_6px_#daf900]" />
+      )}
     </Link>
   );
 };
 
-/* ── sidebar body content (shared desktop + drawer) ── */
+/* ── sidebar body — shared between desktop rail & mobile drawer ── */
 const SidebarBody = ({ onClose, location, user, onLogout }) => (
   <div className="flex flex-col h-full">
     {/* Logo */}
     <div className="h-16 lg:h-20 flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0">
       <Link to="/" onClick={onClose} className="flex items-center gap-2.5">
         <span className="w-2 h-2 rounded-sm bg-primary-fixed shadow-[0_0_8px_#daf900]" />
-        <span className="text-xl font-black font-headline text-white tracking-widest">ALIEN</span>
+        <span className="text-xl font-black font-headline text-white tracking-widest">
+          ALIEN FITNESS
+        </span>
       </Link>
       {onClose && (
-        <button onClick={onClose} className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors">
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors"
+          aria-label="Close menu"
+        >
           <X className="w-5 h-5 text-gray-400" />
         </button>
       )}
@@ -61,26 +75,35 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
     {/* User strip */}
     <div className="px-5 py-4 border-b border-white/5 flex-shrink-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-primary-fixed/20 border border-primary-fixed/40 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-primary-fixed/20 border border-primary-fixed/40
+                        flex items-center justify-center flex-shrink-0">
           <span className="text-primary-fixed font-black font-headline text-lg leading-none">
             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </span>
         </div>
         <div className="min-w-0">
-          <p className="font-headline font-bold text-white text-sm truncate">{user?.name || 'Athlete'}</p>
-          <p className="text-[11px] text-primary-fixed uppercase tracking-wider truncate">Member</p>
+          <p className="font-headline font-bold text-white text-sm truncate">
+            {user?.name || 'Athlete'}
+          </p>
+          <p className="text-[11px] text-primary-fixed uppercase tracking-wider">Member</p>
         </div>
       </div>
     </div>
 
     {/* Nav */}
     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      <p className="px-4 mb-3 text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-gray-600">Navigation</p>
+      <p className="px-4 mb-3 text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-gray-600">
+        Navigation
+      </p>
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.path}
           item={item}
-          isActive={item.path === '/programs' ? location.pathname === '/programs' : location.pathname.startsWith(item.path)}
+          isActive={
+            item.path === '/programs'
+              ? location.pathname === '/programs'
+              : location.pathname.startsWith(item.path)
+          }
           onClick={onClose}
         />
       ))}
@@ -100,7 +123,7 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
   </div>
 );
 
-/* ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════ */
 const ClientSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -115,7 +138,10 @@ const ClientSidebar = () => {
     }
   };
 
+  // Close drawer on route change
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
+
+  // Lock body scroll while drawer is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -123,14 +149,15 @@ const ClientSidebar = () => {
 
   return (
     <>
-      {/* Cart drawer — rendered at root level of this component */}
-      <CartDrawer />
+      {/* CartDrawer is rendered once at the App root — NOT here */}
 
       {/* Mobile overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[50]"
             onClick={() => setIsOpen(false)}
           />
@@ -141,36 +168,53 @@ const ClientSidebar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
             transition={{ type: 'tween', duration: 0.28 }}
-            className="lg:hidden fixed left-0 top-0 h-full w-[280px] z-[55] bg-[#111] border-r border-white/5"
+            className="lg:hidden fixed left-0 top-0 h-full w-[280px] z-[55]
+                       bg-[#111] border-r border-white/5"
           >
-            <SidebarBody onClose={() => setIsOpen(false)} location={location} user={user} onLogout={handleLogout} />
+            <SidebarBody
+              onClose={() => setIsOpen(false)}
+              location={location}
+              user={user}
+              onLogout={handleLogout}
+            />
           </motion.aside>
         )}
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] z-40 bg-[#111] border-r border-white/5">
-        <SidebarBody onClose={null} location={location} user={user} onLogout={handleLogout} />
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] z-40
+                        bg-[#111] border-r border-white/5">
+        <SidebarBody
+          onClose={null}
+          location={location}
+          user={user}
+          onLogout={handleLogout}
+        />
       </aside>
 
-      {/* Mobile top header — logo LEFT, controls RIGHT */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-[45] h-16 bg-[#111]/95 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4">
+      {/* Mobile top header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-[45] h-16
+                         bg-[#111]/95 backdrop-blur-md border-b border-white/5
+                         flex items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-sm bg-primary-fixed shadow-[0_0_6px_#daf900]" />
-          <span className="text-lg font-black font-headline text-white tracking-widest">ALIEN</span>
+          <span className="text-lg font-black font-headline text-white tracking-widest">
+            ALIEN
+          </span>
         </Link>
 
         <div className="flex items-center gap-1">
-          {/* Notification bell */}
           <NotificationBell />
 
-          {/* Cart button */}
+          {/* Cart */}
           <button
             onClick={() => setIsCartOpen(true)}
             className="relative p-2 text-gray-400 hover:text-white transition-colors touch-manipulation"
-            aria-label="Cart"
+            aria-label="Open cart"
           >
             <ShoppingCart className="w-5 h-5" />
             {cartItems.length > 0 && (
@@ -185,17 +229,19 @@ const ClientSidebar = () => {
           {/* Burger */}
           <button
             onClick={() => setIsOpen(true)}
-            className="p-2 bg-white/5 border border-white/10 rounded-lg touch-manipulation hover:bg-white/10 transition-colors"
+            className="p-2 bg-white/5 border border-white/10 rounded-lg
+                       touch-manipulation hover:bg-white/10 transition-colors"
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5 text-white" />
           </button>
 
-          {/* Logout */}
+          {/* Logout shortcut */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-1.5 px-3 py-2 bg-error/10 text-error rounded-lg
-                       hover:bg-error/20 transition-colors touch-manipulation text-xs font-headline font-bold uppercase"
+                       hover:bg-error/20 transition-colors touch-manipulation
+                       text-xs font-headline font-bold uppercase"
           >
             <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline">Out</span>

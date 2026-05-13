@@ -4,25 +4,37 @@ import { useAuth } from '@/contexts/AuthContext';
 import { productsAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star, Minus, Plus, Check } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext'; // ✅ Fixed: was importing from @/components/products/Cart
+import { useCart } from '@/contexts/CartContext';
 import Button from '@/components/common/Button';
 
+/**
+ * ProductDetail
+ *
+ * Publicly accessible — no auth required to VIEW a product.
+ * Authentication is only required when the user clicks "Add to Cart".
+ * Removing the upfront redirect eliminates the 401 loop that occurred when
+ * guests visited /store/:id through PublicLayout.
+ */
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, setIsCartOpen } = useCart();
   const { isAuthenticated } = useAuth();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+
+  const [product, setProduct]   = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [added, setAdded]       = useState(false);
 
   useEffect(() => {
     fetchProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProduct = async () => {
+    setLoading(true);
+    setError(false);
     try {
       const response = await productsAPI.getOne(id);
       setProduct(response.data);
@@ -35,9 +47,9 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
+    // Gate add-to-cart behind authentication
     if (!isAuthenticated) {
-      // Prompt unauthenticated users to log in before adding to cart.
-      navigate('/login');
+      navigate('/login', { state: { from: `/store/${id}` } });
       return;
     }
     for (let i = 0; i < quantity; i++) {
@@ -50,26 +62,32 @@ const ProductDetail = () => {
     }, 1000);
   };
 
+  /* ── loading ── */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-fixed"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-fixed" />
       </div>
     );
   }
 
-  if (error) {
+  /* ── error / not found ── */
+  if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
         <h2 className="text-2xl font-bold mb-4 text-primary-fixed">Product not found</h2>
-        <p className="mb-6 text-on-surface-variant">We were unable to load the product details. It may have been removed or you may need to be logged in.</p>
-        <Link to="/store" className="px-4 py-2 bg-primary-fixed text-on-primary-fixed rounded">
+        <p className="mb-6 text-on-surface-variant">
+          We couldn't load the product details. It may have been removed.
+        </p>
+        <Link
+          to="/store"
+          className="px-4 py-2 bg-primary-fixed text-on-primary-fixed rounded-lg font-headline font-bold"
+        >
           Back to Store
         </Link>
       </div>
     );
   }
-  if (!product) return null;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -82,7 +100,7 @@ const ProductDetail = () => {
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Image */}
+        {/* Product image */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -101,7 +119,7 @@ const ProductDetail = () => {
           )}
         </motion.div>
 
-        {/* Info */}
+        {/* Product info */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -111,7 +129,9 @@ const ProductDetail = () => {
             <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">
               {product.category?.name || 'Uncategorized'}
             </span>
-            <h1 className="text-3xl font-black font-headline text-on-surface mt-2">{product.name}</h1>
+            <h1 className="text-3xl font-black font-headline text-on-surface mt-2">
+              {product.name}
+            </h1>
           </div>
 
           {product.rating && (
@@ -129,7 +149,7 @@ const ProductDetail = () => {
                 ))}
               </div>
               <span className="text-on-surface-variant text-sm">
-                {product.rating} ({product.review_count || 0} reviews)
+                {product.rating} ({product.review_count ?? 0} reviews)
               </span>
             </div>
           )}
@@ -140,35 +160,46 @@ const ProductDetail = () => {
 
           <p className="text-on-surface-variant mb-8">{product.description}</p>
 
+          {/* Stock badge */}
           <div className="mb-8">
-            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-3">Stock Status</p>
+            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-3">
+              Stock Status
+            </p>
             {product.stock > 0 ? (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary-fixed/10 text-primary-fixed rounded-full text-sm font-headline">
+              <span className="inline-flex items-center gap-2 px-4 py-2
+                               bg-primary-fixed/10 text-primary-fixed rounded-full
+                               text-sm font-headline">
                 <Check className="w-4 h-4" />
                 In Stock ({product.stock} available)
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-error/10 text-error rounded-full text-sm font-headline">
+              <span className="inline-flex items-center gap-2 px-4 py-2
+                               bg-error/10 text-error rounded-full text-sm font-headline">
                 Out of Stock
               </span>
             )}
           </div>
 
+          {/* Quantity + CTA */}
           {product.stock > 0 && (
             <div className="mt-auto space-y-4">
               <div className="flex items-center gap-4">
-                <p className="text-xs text-on-surface-variant uppercase tracking-wider">Quantity</p>
+                <p className="text-xs text-on-surface-variant uppercase tracking-wider">
+                  Quantity
+                </p>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
                     className="p-2 bg-surface-container-highest rounded hover:bg-white/10 transition-colors"
+                    aria-label="Decrease quantity"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <span className="w-12 text-center font-headline font-bold">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
                     className="p-2 bg-surface-container-highest rounded hover:bg-white/10 transition-colors"
+                    aria-label="Increase quantity"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -184,7 +215,7 @@ const ProductDetail = () => {
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
+                    {isAuthenticated ? 'Add to Cart' : 'Login to Add to Cart'}
                   </>
                 )}
               </Button>
@@ -193,7 +224,7 @@ const ProductDetail = () => {
         </motion.div>
       </div>
 
-      {/* Additional Info */}
+      {/* Feature highlights */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -201,11 +232,14 @@ const ProductDetail = () => {
         className="mt-12 grid md:grid-cols-3 gap-6"
       >
         {[
-          { title: 'Fast Shipping', desc: 'Free delivery on orders over $50' },
-          { title: 'Secure Payment', desc: '100% secure payment processing' },
-          { title: 'Easy Returns', desc: '30-day return policy' },
+          { title: 'Fast Shipping',   desc: 'Free delivery on orders over $50' },
+          { title: 'Secure Payment',  desc: '100% secure payment processing'   },
+          { title: 'Easy Returns',    desc: '30-day return policy'              },
         ].map((feature, i) => (
-          <div key={i} className="bg-surface-container-high border border-white/5 p-6 rounded-lg">
+          <div
+            key={i}
+            className="bg-surface-container-high border border-white/5 p-6 rounded-lg"
+          >
             <h3 className="font-headline font-bold text-on-surface mb-2">{feature.title}</h3>
             <p className="text-on-surface-variant text-sm">{feature.desc}</p>
           </div>

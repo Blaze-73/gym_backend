@@ -19,7 +19,7 @@ const PUBLIC_NAV = [
 
 const UnifiedNavbar = () => {
   const { user, logout } = useAuth();
-  const { cartItems } = useCart();
+  const { cartItems, setIsCartOpen } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const [scrolled, setScrolled]       = useState(false);
