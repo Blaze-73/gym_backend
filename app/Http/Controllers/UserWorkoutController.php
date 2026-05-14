@@ -45,6 +45,35 @@ class UserWorkoutController extends Controller
             'data' => $userWorkout
         ], 201);
     }
+    // Add this inside UserWorkoutController.php
+
+public function updateProgress(Request $request, $id)
+{
+    $user = Auth::user();
+    // Find the specific session for this user
+    $userWorkout = UserWorkout::where('user_id', $user->id)->find($id);
+
+    if (!$userWorkout) {
+        return response()->json(['message' => 'Workout session not found'], 404);
+    }
+
+    $validated = $request->validate([
+        'completed_exercise_index' => 'required|integer',
+        'elapsed_time' => 'nullable|integer',
+    ]);
+
+    // We can save the progress in the notes or a specific column if you have one
+    // For now, we'll ensure the workout is marked as 'in_progress'
+    $userWorkout->update([
+        'status' => 'in_progress',
+        'notes' => 'Last completed exercise index: ' . $validated['completed_exercise_index']
+    ]);
+
+    return response()->json([
+        'message' => 'Progress saved successfully',
+        'data' => $userWorkout
+    ]);
+}
 
     public function complete(Request $request, $id)
     {

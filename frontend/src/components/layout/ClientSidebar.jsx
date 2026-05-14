@@ -10,13 +10,14 @@ import { useCart } from '@/contexts/CartContext';
 import { NotificationBell } from '@/components/common/NotificationDropdown';
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',  path: '/programs'  },
+  { icon: LayoutDashboard, label: 'Dashboard',  path: '/dashboard'  },
   { icon: Dumbbell,        label: 'Workouts',   path: '/workout'   },
   { icon: Utensils,        label: 'Nutrition',  path: '/nutrition' },
   { icon: Users,           label: 'Coaches',    path: '/coaches'   },
   { icon: ShoppingBag,     label: 'Store',      path: '/store'     },
   { icon: Settings,        label: 'Settings',   path: '/settings'  },
 ];
+
 
 /* ── nav link with animated active bar ─────────────────────────── */
 const NavLink = ({ item, isActive, onClick }) => {

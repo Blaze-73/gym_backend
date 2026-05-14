@@ -31,7 +31,7 @@ const Login = () => {
           navigate('/admin');
         } else {
           // Redirect regular users to their dashboard (programs page)
-          navigate('/programs');
+          navigate('/dashboard');
         }
     } catch (err) {
       console.error('❌ Login error:', err);

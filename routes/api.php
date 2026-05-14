@@ -84,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::prefix('user-workouts')->group(function() {
         Route::get('/', [UserWorkoutController::class, 'index']);
         Route::post('/start', [UserWorkoutController::class, 'start']);
+        Route::post('/{id}/progress', [UserWorkoutController::class, 'updateProgress']);
         Route::post('/{id}/complete', [UserWorkoutController::class, 'complete']);
         Route::get('/statistics', [UserWorkoutController::class, 'statistics']);
     });

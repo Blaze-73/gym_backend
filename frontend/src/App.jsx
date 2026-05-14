@@ -29,13 +29,10 @@ import AdminSettings   from '@/pages/admin/AdminSettings';
 
 // Client pages
 import ClientDashboard from '@/pages/client/ClientDashboard';
-import Programs        from '@/pages/client/Programs';
 import Workout         from '@/pages/client/Workout';
 import Nutrition       from '@/pages/client/Nutrition';
 import Coaches         from '@/pages/client/Coaches';
 import Settings        from '@/pages/client/Settings';
-import NewWorkout      from '@/pages/client/NewWorkout';
-import NewProgram      from '@/pages/client/NewProgram';
 
 function AppRoutes() {
   const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -50,7 +47,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-
       {/* ── Public ─────────────────────────────────────────────────── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
@@ -58,7 +54,7 @@ function AppRoutes() {
           path="/login"
           element={
             isAuthenticated
-              ? <Navigate to={isAdmin() ? '/admin' : '/programs'} replace />
+              ? <Navigate to={isAdmin() ? '/admin' : '/dashboard'} replace />
               : <Login />
           }
         />
@@ -66,12 +62,12 @@ function AppRoutes() {
           path="/register"
           element={
             isAuthenticated
-              ? <Navigate to={isAdmin() ? '/admin' : '/programs'} replace />
+              ? <Navigate to={isAdmin() ? '/admin' : '/dashboard'} replace />
               : <Register />
           }
         />
         <Route path="/store"       element={<Store />} />
-        <Route path="/store/:id"   element={<ProductDetail />} />  {/* ✅ was /products/:id */}
+        <Route path="/store/:id"   element={<ProductDetail />} />
         <Route path="/plans"       element={<Plans />} />
       </Route>
 
@@ -95,12 +91,6 @@ function AppRoutes() {
       </Route>
 
       {/* ── Client ─────────────────────────────────────────────────── */}
-      {/*
-        All client routes share ONE ClientLayout + ONE NotificationProvider.
-        Previously each path segment got its own wrapper which meant
-        5 separate layout trees — broken active-nav highlighting, duplicate
-        sidebars on fast navigation, and wasted re-mounts.
-      */}
       <Route
         element={
           <ProtectedRoute requireNonAdmin>
@@ -110,11 +100,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/programs"         element={<ClientDashboard />} />
-        <Route path="/programs/list"    element={<Programs />} />
-        <Route path="/programs/new"     element={<NewProgram />} />
+        <Route path="/dashboard"         element={<ClientDashboard />} />
         <Route path="/workout"          element={<Workout />} />
-        <Route path="/workout/new"      element={<NewWorkout />} />
         <Route path="/workout/:id"      element={<Workout />} />
         <Route path="/nutrition"        element={<Nutrition />} />
         <Route path="/coaches"          element={<Coaches />} />
@@ -122,25 +109,20 @@ function AppRoutes() {
       </Route>
 
       {/* ── Redirects ──────────────────────────────────────────────── */}
-      <Route path="/profile"    element={<Navigate to="/programs" replace />} />
-      <Route path="/attendance" element={<Navigate to="/programs" replace />} />
+      <Route path="/profile"    element={<Navigate to="/dashboard" replace />} />
+      <Route path="/attendance" element={<Navigate to="/dashboard" replace />} />
       <Route path="/orders"     element={<Navigate to="/store"    replace />} />
 
-      {/* ── 404 ────────────────────────────────────────────────────── */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }
 
 function App() {
   return (
-    // BrowserRouter must wrap everything that uses router hooks (including ScrollToTop).
-    // AuthProvider and CartProvider sit inside it so they can use useNavigate if needed.
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          {/* CartDrawer rendered ONCE here — available in every layout */}
           <CartDrawer />
           <ScrollToTop />
           <AppRoutes />
@@ -150,4 +132,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; // ✅ THIS IS THE CRITICAL LINE THAT WAS MISSING

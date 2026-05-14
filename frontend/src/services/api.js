@@ -28,9 +28,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If the server returns 401 (Unauthorized), clear session and redirect to login
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      // Using window.location.href to ensure a hard reset of the app state
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -52,7 +54,44 @@ export const profileAPI = {
   updatePassword: (data) => api.put('/profile/password', data),
 };
 
-// ============ PLANS ============
+// ============ CLIENT: DASHBOARD & STATS ============
+export const userStatsAPI = {
+  getWorkoutsStats: () => api.get('/user-workouts/statistics'),
+};
+
+// ============ CLIENT: PROGRAMS ============
+export const userProgramsAPI = {
+  getAll: () => api.get('/user-programs'),
+  getActive: () => api.get('/user-programs/active'),
+  create: (data) => api.post('/user-programs', data),
+};
+
+// ============ CLIENT: WORKOUTS ============
+export const workoutsAPI = {
+  getOne: (id) => api.get(`/workouts/${id}`),
+  getPrograms: () => api.get('/programs'), // To populate the program selector
+  getProgramDetails: (id) => api.get(`/programs/${id}`),
+
+  // ntb3 progress
+  startWorkout: (data) => api.post('/user-workouts/start', data),
+  updateProgress: (sessionId, data) => api.post(`/user-workouts/${sessionId}/progress`, data),
+  completeWorkout: (sessionId, data) => api.post(`/user-workouts/${sessionId}/complete`, data),
+};
+
+// ============ CLIENT: NUTRITION ============
+export const nutritionAPI = {
+  getToday: (date) => api.get(`/nutrition/${date}`),
+  logMeal: (data) => api.post('/nutrition/meals', data),
+  updateWater: (data) => api.post('/nutrition', data),
+};
+
+// ============ CLIENT: COACHES ============
+export const coachesAPI = {
+  getAll: () => api.get('/coaches'),
+  assign: (data) => api.post('/coach/assign', data), // e.g. { coach_id: 1 }
+};
+
+// ============ ADMIN: PLANS ============
 export const plansAPI = {
   getAll: () => api.get('/plans'),
   getOne: (id) => api.get(`/plans/${id}`),
@@ -61,7 +100,7 @@ export const plansAPI = {
   delete: (id) => api.delete(`/plans/${id}`),
 };
 
-// ============ MEMBERSHIPS ============
+// ============ ADMIN: MEMBERSHIPS ============
 export const membershipsAPI = {
   getAll: () => api.get('/memberships'),
   getOne: (id) => api.get(`/memberships/${id}`),
@@ -70,7 +109,7 @@ export const membershipsAPI = {
   delete: (id) => api.delete(`/memberships/${id}`),
 };
 
-// ============ USERS ============
+// ============ ADMIN: USERS ============
 export const usersAPI = {
   getAll: (params) => api.get('/users', { params }),
   getOne: (id) => api.get(`/users/${id}`),
@@ -79,7 +118,7 @@ export const usersAPI = {
   delete: (id) => api.delete(`/users/${id}`),
 };
 
-// ============ ATTENDANCE ============
+// ============ ADMIN: ATTENDANCE ============
 export const attendanceAPI = {
   getActive: () => api.get('/attendance/active'),
   history: () => api.get('/attendance/history'),
@@ -87,7 +126,7 @@ export const attendanceAPI = {
   checkOut: () => api.post('/attendance/check-out'),
 };
 
-// ============ PRODUCTS ============
+// ============ ADMIN: PRODUCTS ============
 export const productsAPI = {
   getAll: () => api.get('/products'),
   getOne: (id) => api.get(`/products/${id}`),
@@ -97,7 +136,7 @@ export const productsAPI = {
   updateStock: (id, data) => api.put(`/products/${id}/stock`, data),
 };
 
-// ============ CATEGORIES ============
+// ============ ADMIN: CATEGORIES ============
 export const categoriesAPI = {
   getAll: () => api.get('/categories'),
   create: (data) => api.post('/categories', data),
@@ -105,7 +144,7 @@ export const categoriesAPI = {
   delete: (id) => api.delete(`/categories/${id}`),
 };
 
-// ============ ORDERS ============
+// ============ ADMIN: ORDERS ============
 export const ordersAPI = {
   getAll: () => api.get('/orders'),
   getOne: (id) => api.get(`/orders/${id}`),
@@ -114,7 +153,7 @@ export const ordersAPI = {
   statistics: () => api.get('/orders/statistics'),
 };
 
-// ============ DASHBOARD ============
+// ============ ADMIN: DASHBOARD ============
 export const dashboardAPI = {
   get: () => api.get('/dashboard'),
   trends: () => api.get('/dashboard/trends'),

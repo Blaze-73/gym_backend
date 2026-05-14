@@ -9,11 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { NotificationBell } from '@/components/common/NotificationDropdown';
 
-/**
- * CartDrawer is intentionally NOT rendered here.
- * It is rendered once at the application root (App.jsx).
- */
-
 const NAV_ITEMS = [
   { path: '/admin',          label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/members',  label: 'Members',   icon: Users           },
@@ -132,7 +127,13 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu]   = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !isAdmin()) {
+      navigate('/login');
+    }
+  }, [loading, isAdmin, navigate]);
 
   const handleLogout = async () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -155,16 +156,10 @@ const AdminLayout = () => {
     );
   }
 
-  if (!isAdmin()) {
-    navigate('/login');
-    return null;
-  }
+  if (!isAdmin()) return null;
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* CartDrawer lives in App.jsx — not rendered here */}
-
-      {/* Mobile overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -177,13 +172,11 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] z-40
                         bg-[#111] border-r border-white/5">
         <SidebarBody location={location} user={user} onLogout={handleLogout} onClose={null} />
       </aside>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.aside
@@ -204,12 +197,10 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Main area */}
       <div className="lg:ml-[280px] min-h-screen flex flex-col">
         <header className="h-16 lg:h-20 bg-[#111]/80 backdrop-blur-md border-b border-white/5
                            sticky top-0 z-40 flex items-center px-4 md:px-6 lg:px-8">
 
-          {/* Desktop search */}
           <div className="hidden lg:flex items-center flex-1">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -223,7 +214,6 @@ const AdminLayout = () => {
             </div>
           </div>
 
-          {/* Mobile logo */}
           <div className="lg:hidden flex-1">
             <Link to="/" className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-sm bg-primary-fixed shadow-[0_0_6px_#daf900]" />
@@ -231,11 +221,9 @@ const AdminLayout = () => {
             </Link>
           </div>
 
-          {/* Right controls */}
           <div className="flex items-center gap-1 sm:gap-2">
             <NotificationBell />
 
-            {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative p-2 text-gray-400 hover:text-white transition-colors touch-manipulation"
@@ -251,7 +239,6 @@ const AdminLayout = () => {
               )}
             </button>
 
-            {/* Mobile burger */}
             <button
               onClick={() => setIsSidebarOpen(true)}
               className="lg:hidden p-2 bg-white/5 border border-white/10 rounded-lg
@@ -261,7 +248,6 @@ const AdminLayout = () => {
               <Menu className="w-5 h-5 text-white" />
             </button>
 
-            {/* Mobile logout shortcut */}
             <button
               onClick={handleLogout}
               className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-error/10 text-error
@@ -272,7 +258,6 @@ const AdminLayout = () => {
               <span className="hidden sm:inline">Out</span>
             </button>
 
-            {/* Desktop user dropdown */}
             <div className="hidden lg:relative lg:block">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}

@@ -68,42 +68,48 @@ class NutritionController extends Controller
         ]);
     }
 
-    public function addMeal(Request $request)
-    {
-        $user = Auth::user();
+   public function addMeal(Request $request)
+{
+    $user = Auth::user();
 
-        $validated = $request->validate([
-            'nutrition_log_id' => 'required|exists:nutrition_logs,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|string',
-            'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
-            'calories' => 'required|integer',
-            'protein_g' => 'nullable|integer',
-            'carbs_g' => 'nullable|integer',
-            'fats_g' => 'nullable|integer',
-            'eaten_at' => 'nullable|date_format:H:i',
-        ]);
+    // Change: We now look for log_date instead of nutrition_log_id
+    $validated = $request->validate([
+        'log_date' => 'required|date',
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'image' => 'nullable|string',
+        'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
+        'calories' => 'required|integer',
+        'protein_g' => 'nullable|integer',
+        'carbs_g' => 'nullable|integer',
+        'fats_g' => 'nullable|integer',
+        'eaten_at' => 'nullable|date_format:H:i',
+    ]);
 
-        $meal = Meal::create([
-            ...$validated,
-            'user_id' => $user->id,
-        ]);
+    // Find or create the nutrition log for this user on this date
+    $log = NutritionLog::firstOrCreate(
+        ['user_id' => $user->id, 'log_date' => $validated['log_date']],
+        ['calories' => 0, 'protein_g' => 0, 'carbs_g' => 0, 'fats_g' => 0]
+    );
 
-        // Update nutrition log totals
-        $log = NutritionLog::find($validated['nutrition_log_id']);
-        $log->update([
-            'calories' => $log->calories + $validated['calories'],
-            'protein_g' => $log->protein_g + ($validated['protein_g'] ?? 0),
-            'carbs_g' => $log->carbs_g + ($validated['carbs_g'] ?? 0),
-            'fats_g' => $log->fats_g + ($validated['fats_g'] ?? 0),
-        ]);
+    $meal = Meal::create([
+        ...$validated,
+        'nutrition_log_id' => $log->id, // Assign the ID we found/created
+        'user_id' => $user->id,
+    ]);
 
-        return response()->json([
-            'message' => 'Meal added successfully',
-            'data' => $meal
-        ], 201);
-    }
+    // Update nutrition log totals
+    $log->increment('calories', $validated['calories']);
+    $log->increment('protein_g', $validated['protein_g'] ?? 0);
+    $log->increment('carbs_g', $validated['carbs_g'] ?? 0);
+    $log->increment('fats_g', $validated['fats_g'] ?? 0);
+
+    return response()->json([
+        'message' => 'Meal added successfully',
+        'data' => $meal
+    ], 201);
+}
+
 
     public function updateMeal(Request $request, $id)
     {
