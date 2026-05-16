@@ -18,7 +18,8 @@ const AdminMembers = () => {
   const fetchMembers = async () => {
     try {
       const response = await usersAPI.getAll();
-      setMembers(Array.isArray(response.data) ? response.data : []);
+      const data = response.data.data || response.data;
+      setMembers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch members:', error);
       setMembers([]);

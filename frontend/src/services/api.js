@@ -126,6 +126,13 @@ export const attendanceAPI = {
   checkOut: () => api.post('/attendance/check-out'),
 };
 
+// admin schedules
+export const schedulesAPI = {
+  getAll: () => api.get('/schedules'),
+   create: (data) => api.post('/schedules', data),
+   update: (id, data) => api.put(`/schedules/${id}`, data),
+   delete: (id) => api.delete(`/schedules/${id}`),
+};
 // ============ ADMIN: PRODUCTS ============
 export const productsAPI = {
   getAll: () => api.get('/products'),

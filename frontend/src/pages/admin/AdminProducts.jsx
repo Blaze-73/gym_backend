@@ -22,7 +22,9 @@ const AdminProducts = () => {
         categoriesAPI.getAll(),
       ]);
       setProducts(Array.isArray(productsRes.data)    ? productsRes.data    : []);
-      setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
+      const cats = categoriesRes.data.categories || categoriesRes.data;
+      setCategories(Array.isArray(cats) ? cats : []);
+      
     } catch (error) {
       console.error('Failed to fetch:', error);
       setProducts([]);

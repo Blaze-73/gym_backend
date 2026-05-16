@@ -24,7 +24,8 @@ const AdminAddProduct = () => {
     const init = async () => {
       try {
         const catRes = await categoriesAPI.getAll();
-        setCategories(Array.isArray(catRes.data) ? catRes.data : []);
+        const cats = catRes.data.categories || catRes.data;
+        setCategories(Array.isArray(cats) ? cats : []);
 
         if (isEdit) {
           const prodRes = await productsAPI.getOne(id);

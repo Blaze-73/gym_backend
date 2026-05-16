@@ -146,6 +146,9 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
         Route::put('/products/{product}/stock', [ProductController::class, 'updateStock']);
 
+        // schedules management
+        Route::apiResource('schedules', ScheduleController::class);
+
         // Category Management
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);

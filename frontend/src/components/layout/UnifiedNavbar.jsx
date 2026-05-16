@@ -133,7 +133,7 @@ const UnifiedNavbar = () => {
                                    rounded-xl shadow-2xl py-2 z-50"
                       >
                         <Link
-                          to={user.role === 'admin' ? '/admin' : '/programs'}
+                          to={user.role === 'admin' ? '/admin' : '/dashboard'}
                           className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                         >
                           {user.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
