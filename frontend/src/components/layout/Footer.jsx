@@ -93,11 +93,11 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-gray-300">
               <li className="flex items-start gap-3">
                 <Dumbbell className="w-5 h-5 text-primary-fixed flex-shrink-0 mt-0.5" />
-                <span>Elite Fitness District<br />Performance Zone 42</span>
+                <span>Elite Fitness Tanger Ismontic<br />Performance Zone 42</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="text-primary-fixed">📞</span>
-                <a href="tel:+212600000000" className="hover:text-white transition-colors">
+                <a href="tel:06 43 43 54 89" className="hover:text-white transition-colors">
                   +212 6 00 00 00 00
                 </a>
               </li>
@@ -114,7 +114,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <p>© {currentYear} ALIEN Performance System. All rights reserved.</p>
+            <p>© 2026 ALIEN Performance System. All rights reserved.</p>
             <div className="flex gap-6">
               <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
               <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>

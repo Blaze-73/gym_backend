@@ -41,22 +41,36 @@ const AdminSettings = () => {
   };
 
   const handleSave = async (e) => {
-    e?.preventDefault();
-    setSaving(true);
-    try {
-      // For account tab update the profile via API
-      if (activeTab === 'account') {
-        const res = await profileAPI.update({ name: form.name, email: form.email });
-        updateUser(res.data.user || res.data);
-      }
-      // General / notifications are local config — show success
-      showMsg('success', activeTab === 'account' ? 'Profile updated!' : 'Settings saved!');
-    } catch (err) {
-      showMsg('error', err.response?.data?.message || 'Save failed. Please try again.');
-    } finally {
-      setSaving(false);
+  e?.preventDefault();
+  setSaving(true);
+  try {
+    if (activeTab === 'account') {
+      const payload = { 
+        name: form.name, 
+        email: form.email,
+        // Admin can also update their phone/city here
+        phone: form.phone 
+      };
+      const res = await profileAPI.update(payload);
+      updateUser(res.data.user || res.data);
+    } else if (activeTab === 'notifications') {
+      const payload = {
+        emailNotifications: form.emailNotifications,
+        pushNotifications: form.pushNotifications,
+        memberAlerts: form.memberAlerts,
+        orderAlerts: form.orderAlerts,
+        systemUpdates: form.systemUpdates,
+      };
+      await profileAPI.updateSettings(payload);
     }
-  };
+    showMsg('success', 'Settings synchronized with server!');
+  } catch (err) {
+    showMsg('error', err.response?.data?.message || 'Update failed.');
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   const handleDiscard = () => {
     setForm(INITIAL);

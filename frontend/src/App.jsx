@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import NotificationProvider from '@/components/common/NotificationDropdown';
 import CartDrawer from '@/components/common/CartDrawer';
+import Forbidden from '@/pages/Forbidden';
 
 // Layouts
 import PublicLayout   from '@/components/layout/PublicLayout';
@@ -47,6 +48,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/forbidden" element={<Forbidden />} />
       {/* ── Public ─────────────────────────────────────────────────── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />

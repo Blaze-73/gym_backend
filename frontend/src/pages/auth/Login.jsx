@@ -15,33 +15,34 @@ const Login = () => {
     password: '',
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+      const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    console.log('📝 Login form submitted:', formData);
+  try {
+    // 1. Call the login function from context
+    const responseData = await login(formData);
+    
+    // 2. Get the saved redirect path from the interceptor
+    const redirectPath = localStorage.getItem('redirectPath');
+    localStorage.removeItem('redirectPath');
 
-    try {
-        const responseData = await login(formData);
-        console.log('🎯 Login response:', responseData);
-        console.log('👤 User role:', responseData.user?.role);
-        // ✅ Redirect: admin to admin area, normal users to landing page
-        if (responseData.user?.role === 'admin') {
-          navigate('/admin');
-        } else {
-          // Redirect regular users to their dashboard (programs page)
-          navigate('/dashboard');
-        }
-    } catch (err) {
-      console.error('❌ Login error:', err);
-      console.error('❌ Error response:', err.response?.data);
-      
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
+    // 3. Check role and navigate
+    if (responseData.user?.role === 'admin') {
+      navigate(redirectPath || '/admin');
+    } else {
+      navigate(redirectPath || '/dashboard');
     }
-  };
+  } catch (err) {
+    console.error("Login Error:", err);
+    setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">

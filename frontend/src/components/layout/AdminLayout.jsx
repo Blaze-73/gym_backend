@@ -8,6 +8,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { NotificationBell } from '@/components/common/NotificationDropdown';
+import Modal from '@/components/common/Modal';
+import Button from '@/components/common/Button';
 
 const NAV_ITEMS = [
   { path: '/admin',          label: 'Dashboard', icon: LayoutDashboard },
@@ -128,6 +130,7 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAdmin()) {
@@ -135,11 +138,11 @@ const AdminLayout = () => {
     }
   }, [loading, isAdmin, navigate]);
 
-  const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      await logout();
-      navigate('/');
-    }
+  const handleLogoutInitiate = () => setConfirmLogout(true);
+  
+  const executeLogout = async () => {
+    await logout();
+    navigate('/');
   };
 
   useEffect(() => { setIsSidebarOpen(false); }, [location.pathname]);
@@ -174,7 +177,7 @@ const AdminLayout = () => {
 
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] z-40
                         bg-[#111] border-r border-white/5">
-        <SidebarBody location={location} user={user} onLogout={handleLogout} onClose={null} />
+        <SidebarBody location={location} user={user} onLogout={handleLogoutInitiate} onClose={null} />
       </aside>
 
       <AnimatePresence>
@@ -190,7 +193,7 @@ const AdminLayout = () => {
             <SidebarBody
               location={location}
               user={user}
-              onLogout={handleLogout}
+              onLogout={handleLogoutInitiate}
               onClose={() => setIsSidebarOpen(false)}
             />
           </motion.aside>
@@ -232,8 +235,8 @@ const AdminLayout = () => {
               <ShoppingCart className="w-5 h-5" />
               {cartItems.length > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5
-                                 bg-primary-fixed text-black text-[9px] font-black rounded-full
-                                 flex items-center justify-center">
+                               bg-primary-fixed text-black text-[9px] font-black rounded-full
+                               flex items-center justify-center">
                   {cartItems.length}
                 </span>
               )}
@@ -249,7 +252,7 @@ const AdminLayout = () => {
             </button>
 
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutInitiate}
               className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-error/10 text-error
                          rounded-lg hover:bg-error/20 transition-colors touch-manipulation
                          text-xs font-headline font-bold uppercase"
@@ -298,7 +301,7 @@ const AdminLayout = () => {
                       Settings
                     </Link>
                     <button
-                      onClick={() => { setShowUserMenu(false); handleLogout(); }}
+                      onClick={() => { setShowUserMenu(false); handleLogoutInitiate(); }}
                       className="w-full px-4 py-2.5 text-sm text-error hover:bg-white/5
                                  transition-colors flex items-center gap-2"
                     >
@@ -315,6 +318,21 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      <Modal 
+        isOpen={confirmLogout} 
+        onClose={() => setConfirmLogout(false)} 
+        title="Confirm Exit" 
+        size="sm"
+      >
+        <div className="text-center space-y-6 py-4">
+          <p className="text-gray-400">Are you sure you want to leave the system? Your session will be terminated.</p>
+          <div className="flex gap-3">
+            <Button onClick={() => setConfirm .setConfirmLogout(false)} variant="secondary" className="flex-1">Cancel</Button>
+            <Button onClick={executeLogout} variant="danger" className="flex-1">Logout</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

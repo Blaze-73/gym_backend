@@ -8,6 +8,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { NotificationBell } from '@/components/common/NotificationDropdown';
+import Modal from '@/components/common/Modal';
+import Button from '@/components/common/Button';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',  path: '/dashboard'  },
@@ -18,8 +20,6 @@ const NAV_ITEMS = [
   { icon: Settings,        label: 'Settings',   path: '/settings'  },
 ];
 
-
-/* ── nav link with animated active bar ─────────────────────────── */
 const NavLink = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
   return (
@@ -51,10 +51,8 @@ const NavLink = ({ item, isActive, onClick }) => {
   );
 };
 
-/* ── sidebar body — shared between desktop rail & mobile drawer ── */
 const SidebarBody = ({ onClose, location, user, onLogout }) => (
   <div className="flex flex-col h-full">
-    {/* Logo */}
     <div className="h-16 lg:h-20 flex items-center justify-between px-6 border-b border-white/5 flex-shrink-0">
       <Link to="/" onClick={onClose} className="flex items-center gap-2.5">
         <span className="w-2 h-2 rounded-sm bg-primary-fixed shadow-[0_0_8px_#daf900]" />
@@ -73,7 +71,6 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
       )}
     </div>
 
-    {/* User strip */}
     <div className="px-5 py-4 border-b border-white/5 flex-shrink-0">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-primary-fixed/20 border border-primary-fixed/40
@@ -91,7 +88,6 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
       </div>
     </div>
 
-    {/* Nav */}
     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
       <p className="px-4 mb-3 text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-gray-600">
         Navigation
@@ -110,7 +106,6 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
       ))}
     </nav>
 
-    {/* Logout */}
     <div className="px-3 py-4 border-t border-white/5 flex-shrink-0">
       <button
         onClick={onLogout}
@@ -124,25 +119,22 @@ const SidebarBody = ({ onClose, location, user, onLogout }) => (
   </div>
 );
 
-/* ══════════════════════════════════════════════════════════════════ */
 const ClientSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
   const { cartItems, setIsCartOpen } = useCart();
 
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      try { logout(); } catch { /* ignore */ }
-      localStorage.removeItem('token');
-      window.location.replace('/');
-    }
+  const handleLogout = async () => {
+    try { 
+      await logout(); 
+    } catch { /* ignore */ }
+    localStorage.removeItem('token');
+    window.location.replace('/');
   };
 
-  // Close drawer on route change
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
-
-  // Lock body scroll while drawer is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -150,9 +142,6 @@ const ClientSidebar = () => {
 
   return (
     <>
-      {/* CartDrawer is rendered once at the App root — NOT here */}
-
-      {/* Mobile overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -165,7 +154,6 @@ const ClientSidebar = () => {
         )}
       </AnimatePresence>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.aside
@@ -180,24 +168,22 @@ const ClientSidebar = () => {
               onClose={() => setIsOpen(false)}
               location={location}
               user={user}
-              onLogout={handleLogout}
+              onLogout={() => setShowLogoutModal(true)}
             />
           </motion.aside>
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[280px] z-40
                         bg-[#111] border-r border-white/5">
         <SidebarBody
           onClose={null}
           location={location}
           user={user}
-          onLogout={handleLogout}
+          onLogout={() => setShowLogoutModal(true)}
         />
       </aside>
 
-      {/* Mobile top header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-[45] h-16
                          bg-[#111]/95 backdrop-blur-md border-b border-white/5
                          flex items-center justify-between px-4">
@@ -210,8 +196,6 @@ const ClientSidebar = () => {
 
         <div className="flex items-center gap-1">
           <NotificationBell />
-
-          {/* Cart */}
           <button
             onClick={() => setIsCartOpen(true)}
             className="relative p-2 text-gray-400 hover:text-white transition-colors touch-manipulation"
@@ -227,7 +211,6 @@ const ClientSidebar = () => {
             )}
           </button>
 
-          {/* Burger */}
           <button
             onClick={() => setIsOpen(true)}
             className="p-2 bg-white/5 border border-white/10 rounded-lg
@@ -237,9 +220,8 @@ const ClientSidebar = () => {
             <Menu className="w-5 h-5 text-white" />
           </button>
 
-          {/* Logout shortcut */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 bg-error/10 text-error rounded-lg
                        hover:bg-error/20 transition-colors touch-manipulation
                        text-xs font-headline font-bold uppercase"
@@ -249,6 +231,21 @@ const ClientSidebar = () => {
           </button>
         </div>
       </header>
+
+      <Modal 
+        isOpen={showLogoutModal} 
+        onClose={() => setShowLogoutModal(false)} 
+        title="Security Check" 
+        size="sm"
+      >
+        <div className="text-center space-y-6 py-4">
+          <p className="text-gray-400">Ready to disconnect from the Alien System?</p>
+          <div className="flex gap-3">
+            <Button onClick={() => setShowLogoutModal(false)} variant="secondary" className="flex-1">Stay</Button>
+            <Button onClick={handleLogout} variant="danger" className="flex-1">Exit</Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

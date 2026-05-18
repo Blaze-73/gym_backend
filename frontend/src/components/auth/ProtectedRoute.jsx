@@ -20,7 +20,11 @@ const ProtectedRoute = ({ requireAdmin = false, requireNonAdmin = false, childre
 
   if (requireAdmin && !isAdmin()) {
     // Admin required but user is not admin
-    return <Navigate to="/programs" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireAdmin && !isAdmin()) {
+    return <Navigate to="/forbidden" replace />;
   }
 
   if (requireNonAdmin && isAdmin()) {

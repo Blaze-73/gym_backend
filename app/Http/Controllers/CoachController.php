@@ -11,13 +11,13 @@ class CoachController extends Controller
 {
     public function index()
     {
-        $coaches = Coach::with('user')->where('is_available', true)->get();
+        $coaches = Coach::where('is_available', true)->get();
         return response()->json($coaches);
     }
 
     public function show($id)
     {
-        $coach = Coach::with('user')->find($id);
+        $coach = Coach::find($id);
         if (!$coach) {
             return response()->json(['message' => 'Coach not found'], 404);
         }

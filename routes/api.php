@@ -17,6 +17,7 @@ use App\Http\Controllers\NutritionController;
 use App\Http\Controllers\CoachController;
 use App\Http\Controllers\UserWorkoutController;
 use App\Http\Controllers\UserProgramController;
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,21 +30,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public view routes
-Route::get('/plans', [PlanController::class, 'index']);
-Route::get('/plans/{plan}', [PlanController::class, 'show']);
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
-Route::get('/categories', [CategoryController::class, 'index']);
 
-// Public data routes (no auth required for viewing)
-Route::get('/workouts', [WorkoutController::class, 'index']);
-Route::get('/workouts/{workout}', [WorkoutController::class, 'show']);
-Route::get('/programs', [ProgramController::class, 'index']);
-Route::get('/programs/{program}', [ProgramController::class, 'show']);
-Route::get('/exercises', [ExerciseController::class, 'index']);
-Route::get('/coaches', [CoachController::class, 'index']);
-Route::get('/coaches/{coach}', [CoachController::class, 'show']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function() {
@@ -60,6 +47,22 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/settings', [ProfileController::class, 'updateSettings']);
         Route::delete('/', [ProfileController::class, 'destroy']);
     });
+        // plans and workouts view routes
+    Route::get('/plans', [PlanController::class, 'index']);
+    Route::get('/plans/{plan}', [PlanController::class, 'show']);
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
+    Route::get('/categories', [CategoryController::class, 'index']);
+
+    // Public data routes (no auth required for viewing)
+    Route::get('/workouts', [WorkoutController::class, 'index']);
+    Route::get('/workouts/{workout}', [WorkoutController::class, 'show']);
+    Route::get('/programs', [ProgramController::class, 'index']);
+    Route::get('/programs/{program}', [ProgramController::class, 'show']);
+    Route::get('/exercises', [ExerciseController::class, 'index']);
+    Route::get('/coaches', [CoachController::class, 'index']);
+    Route::get('/coaches/{coach}', [CoachController::class, 'show']);
+
 
     // Memberships
     Route::apiResource('memberships', MembershipController::class);

@@ -98,6 +98,7 @@ class OrderController extends Controller
             }
 
             DB::commit();
+            Mail::to('gymadmin@gmail.com')->send(new Order\OrderConfirmed($order));
 
             return response()->json([
                 'message' => 'Order placed successfully',

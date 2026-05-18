@@ -8,19 +8,20 @@ use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-    // Get all classes for the calendar
     public function index()
     {
-        $schedules = Schedule::with('coach')->get();
-        return response()->json($schedules);
+        try {
+            $schedules = Schedule::all();
+            return response()->json($schedules);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    // Create a new class
     public function store(Request $request)
     {
         $validated = $request->validate([
             'class_name' => 'required|string|max:255',
-            'coach_id' => 'required|exists:users,id',
             'day_of_week' => 'required|string',
             'start_time' => 'required',
             'end_time' => 'required',
@@ -36,7 +37,6 @@ class ScheduleController extends Controller
         ], 201);
     }
 
-    // Update a class
     public function update(Request $request, $id)
     {
         $schedule = Schedule::find($id);
@@ -46,7 +46,6 @@ class ScheduleController extends Controller
         return response()->json(['message' => 'Updated successfully', 'data' => $schedule]);
     }
 
-    // Delete a class
     public function destroy($id)
     {
         $schedule = Schedule::find($id);
