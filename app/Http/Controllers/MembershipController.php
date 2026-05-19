@@ -9,9 +9,6 @@ use Illuminate\Http\Request;
 
 class MembershipController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(Membership::with(['user','plan'])->get());
@@ -19,62 +16,92 @@ class MembershipController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * UPDATED: Sets status to 'pending' instead of 'active'
      */
-    public function store(Request $request)
-    {
-        $request->validate(['user_id' => 'required|exists:users,id',
+   public function store(Request $request)
+{
+    // Remove user_id from validation since we get it from the Auth token
+    $request->validate([
         'plan_id' => 'required|exists:plans,id',
-        'start_date' => 'required|date']);
-        $plan = Plan::find($request->plan_id);
+        'start_date' => 'required|date',
+    ]);
 
-        $start = Carbon::parse($request->start_date);
-        $end = $start->copy()->addDays($plan->duration);
+    $plan = Plan::find($request->plan_id);
+    $start = Carbon::parse($request->start_date);
+    $end = $start->copy()->addDays($plan->duration);
 
-        $membership = Membership::create([
-        'user_id' => $request->user_id,
+    $membership = Membership::create([
+        'user_id' => $request->user()->id, // ✅ SECURE: Gets ID from the token
         'plan_id' => $request->plan_id,
         'start_date' => $start,
         'end_date' => $end,
-        'status' => 'active'
-        ]);
-        return response()->json($membership,201);
-    }
+        'status' => 'pending' 
+    ]);
+
+    return response()->json([
+        'message' => 'Membership request submitted for approval',
+        'membership' => $membership
+    ], 201);
+}
 
     /**
-     * Display the specified resource.
+     * NEW: Get pending memberships for Admin Notifications
      */
+    public function pending()
+    {
+        $pending = Membership::with(['user', 'plan'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($pending);
+    }
+
     public function show(string $id)
     {
         $membership = Membership::with(['user','plan'])->find($id);
         if(!$membership){
-            return response()->json(['message' => 'Membership not found']);
+            return response()->json(['message' => 'Membership not found'], 404);
         }
         return response()->json($membership);
     }   
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $membership = Membership::find($id);
          if(!$membership){
-            return response()->json(['message' => 'membership not found']);
+            return response()->json(['message' => 'membership not found'], 404);
          }
+         
          $membership->update($request->all());
-         return response()->json($membership);
+         return response()->json([
+             'message' => 'Membership status updated successfully',
+             'membership' => $membership
+         ]);
+    }
+    public function me()
+    {
+        // This finds the membership for the user currently logged in
+        $membership = \App\Models\Membership::where('user_id', auth()->id())
+            ->with('plan') 
+            ->first();
+
+        if (!$membership) {
+            // Return 404 if they haven't requested any plan yet
+            return response()->json(['message' => 'No membership found'], 404);
+        }
+
+        return response()->json($membership);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
         $membership = Membership::find($id);
         if (!$membership){
-            return response()->json(['message' => 'Membership not found']);
+            return response()->json(['message' => 'Membership not found'], 404);
         }
         $membership->delete();
-        return response()->json('membership deleted');
+        return response()->json(['message' => 'membership deleted']);
     }
 }

@@ -1,276 +1,296 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { User, Shield, Bell, Save, ToggleRight, ToggleLeft, AlertTriangle, CheckCircle, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  User, Shield, Bell, Save, Lock, 
+  Trash2, AlertCircle, CheckCircle, 
+  Smartphone, Mail, Globe, LogOut 
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { profileAPI } from '@/services/api';
-
-const Toggle = ({ checked, onChange }) => (
-  <button onClick={onChange} className={`transition-colors ${checked ? 'text-primary-fixed' : 'text-gray-600'}`}>
-    {checked ? <ToggleRight className="w-12 h-6" /> : <ToggleLeft className="w-12 h-6" />}
-  </button>
-);
+import Button from '@/components/common/Button';
+import Modal from '@/components/common/Modal';
 
 const AdminSettings = () => {
-  const { user, updateUser, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('general');
-  const [saving, setSaving] = useState(false);
+  const { user, updateUser } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-
-  const INITIAL = {
-    gymName: 'ALIEN Performance',
-    supportEmail: user?.email || 'admin@alien.com',
-    phone: '+212 6 00 00 00 00',
-    address: 'Elite Fitness District, Performance Zone 42',
-    name: user?.name || '',
-    email: user?.email || '',
+  
+  // Form States
+  const [profileForm, setProfileForm] = useState({
+    name: '', email: '', phone: '',
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '', new_password: '', password_confirmation: '',
+  });
+  const [prefsForm, setPrefsForm] = useState({
     emailNotifications: true,
     pushNotifications: false,
-    memberAlerts: true,
-    orderAlerts: true,
-    systemUpdates: false,
-  };
+    systemUpdates: true,
+  });
 
-  const [form, setForm] = useState(INITIAL);
-
-  const toggle = (key) => setForm(f => ({ ...f, [key]: !f[key] }));
-  const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
 
   const showMsg = (type, text) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: '', text: '' }), 3500);
+    setTimeout(() => setMessage({ type: '', text: '' }), 4000);
   };
 
-  const handleSave = async (e) => {
-  e?.preventDefault();
-  setSaving(true);
-  try {
-    if (activeTab === 'account') {
-      const payload = { 
-        name: form.name, 
-        email: form.email,
-        // Admin can also update their phone/city here
-        phone: form.phone 
-      };
-      const res = await profileAPI.update(payload);
+  // --- HANDLERS ---
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await profileAPI.update(profileForm);
       updateUser(res.data.user || res.data);
-    } else if (activeTab === 'notifications') {
-      const payload = {
-        emailNotifications: form.emailNotifications,
-        pushNotifications: form.pushNotifications,
-        memberAlerts: form.memberAlerts,
-        orderAlerts: form.orderAlerts,
-        systemUpdates: form.systemUpdates,
-      };
-      await profileAPI.updateSettings(payload);
-    }
-    showMsg('success', 'Settings synchronized with server!');
-  } catch (err) {
-    showMsg('error', err.response?.data?.message || 'Update failed.');
-  } finally {
-    setSaving(false);
-  }
-};
-
-
-  const handleDiscard = () => {
-    setForm(INITIAL);
-    showMsg('success', 'Changes discarded.');
-  };
-
-  const handleDangerDelete = () => {
-    if (window.confirm('⚠️ This will permanently delete ALL data. This cannot be undone. Are you absolutely sure?')) {
-      showMsg('error', 'Action blocked — contact your system administrator.');
+      showMsg('success', 'Identity synchronized successfully.');
+    } catch (err) {
+      showMsg('error', err.response?.data?.message || 'Update failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const TABS = ['general', 'account', 'security', 'notifications'];
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await profileAPI.updatePassword(passwordForm);
+      showMsg('success', 'Security credentials updated.');
+      setPasswordForm({ current_password: '', new_password: '', password_confirmation: '' });
+    } catch (err) {
+      showMsg('error', err.response?.data?.message || 'Password update failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrefsUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await profileAPI.updateSettings(prefsForm);
+      showMsg('success', 'System preferences updated.');
+    } catch (err) {
+      showMsg('error', 'Preference sync failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black font-headline uppercase italic">
-          SYSTEM <span className="text-primary-fixed">SETTINGS</span>
-        </h1>
-        <p className="text-gray-400 mt-1">Configure your gym management system.</p>
+    <div className="max-w-6xl mx-auto space-y-12 pb-20">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-black font-headline text-white uppercase italic tracking-tighter">
+            SYSTEM <span className="text-primary-fixed">COMMAND</span>
+          </h1>
+          <p className="text-gray-500 mt-2 text-sm uppercase tracking-widest font-bold">
+            Administrator Control Panel & Account Security
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-gray-400 uppercase tracking-widest">
+            Role: <span className="text-primary-fixed">System Architect</span>
+          </div>
+        </div>
       </div>
 
-      {/* Alert */}
-      {message.text && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 p-4 rounded-xl border text-sm font-headline
-            ${message.type === 'success'
-              ? 'bg-primary-fixed/10 border-primary-fixed/30 text-primary-fixed'
-              : 'bg-error/10 border-error/30 text-error'
+      {/* TOAST MESSAGE */}
+      <AnimatePresence>
+        {message.text && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className={`p-4 rounded-2xl border flex items-center gap-3 ${
+              message.type === 'success' ? 'bg-primary-fixed/10 border-primary-fixed/20 text-primary-fixed' : 'bg-error/10 border-error/20 text-error'
             }`}
-        >
-          {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-          {message.text}
-        </motion.div>
-      )}
-
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-white/5 overflow-x-auto">
-        {TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-3 text-xs font-headline font-black uppercase tracking-wider whitespace-nowrap
-                        border-b-2 -mb-px transition-colors
-              ${activeTab === tab ? 'border-primary-fixed text-primary-fixed' : 'border-transparent text-gray-500 hover:text-white'}`}
           >
-            {tab}
-          </button>
-        ))}
-      </div>
+            {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span className="text-sm font-bold uppercase tracking-wider">{message.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── General ── */}
-      {activeTab === 'general' && (
-        <form onSubmit={handleSave} className="bg-surface-container-high border border-white/5 rounded-2xl p-6 space-y-5">
-          <h3 className="font-headline font-black uppercase text-sm text-gray-300">Gym Identity</h3>
-          <div className="grid sm:grid-cols-2 gap-5">
-            {[
-              { label: 'Gym Name',      key: 'gymName'      },
-              { label: 'Support Email', key: 'supportEmail', type: 'email' },
-              { label: 'Phone',         key: 'phone',        type: 'tel'   },
-              { label: 'Address',       key: 'address'      },
-            ].map(({ label, key, type = 'text' }) => (
-              <div key={key}>
-                <label className="block text-xs font-headline font-bold uppercase tracking-wider text-gray-500 mb-2">{label}</label>
-                <input
-                  type={type} value={form[key]} onChange={set(key)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-fixed/50 transition-colors"
-                />
+      {/* MAIN BENTO GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* COLUMN 1: IDENTITY */}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+          className="lg:col-span-2 space-y-8"
+        >
+          <section className="bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-md">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-primary-fixed/10 rounded-2xl text-primary-fixed">
+                <User className="w-6 h-6" />
               </div>
-            ))}
-          </div>
-          <SaveBar onSave={handleSave} onDiscard={handleDiscard} saving={saving} />
-        </form>
-      )}
+              <h2 className="text-xl font-black font-headline uppercase text-white">Identity Profile</h2>
+            </div>
 
-      {/* ── Account ── */}
-      {activeTab === 'account' && (
-        <form onSubmit={handleSave} className="bg-surface-container-high border border-white/5 rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-3 mb-2">
-            <User className="w-5 h-5 text-primary-fixed" />
-            <h3 className="font-headline font-black uppercase text-sm text-gray-300">Admin Profile</h3>
-          </div>
-          {[
-            { label: 'Name',  key: 'name'  },
-            { label: 'Email', key: 'email', type: 'email' },
-          ].map(({ label, key, type = 'text' }) => (
-            <div key={key}>
-              <label className="block text-xs font-headline font-bold uppercase tracking-wider text-gray-500 mb-2">{label}</label>
-              <input
-                type={type} value={form[key]} onChange={set(key)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-fixed/50 transition-colors"
-              />
-            </div>
-          ))}
-          <div>
-            <label className="block text-xs font-headline font-bold uppercase tracking-wider text-gray-500 mb-2">Role</label>
-            <input
-              value={user?.role || 'admin'} disabled
-              className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-sm text-primary-fixed cursor-not-allowed"
-            />
-          </div>
-          <SaveBar onSave={handleSave} onDiscard={handleDiscard} saving={saving} />
-        </form>
-      )}
+            <form onSubmit={handleProfileUpdate} className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  <input 
+                    type="text" value={profileForm.name} 
+                    onChange={e => setProfileForm({...profileForm, name: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  <input 
+                    type="email" value={profileForm.email} 
+                    onChange={e => setProfileForm({...profileForm, email: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Phone Number</label>
+                <div className="relative">
+                  <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  <input 
+                    type="text" value={profileForm.phone} 
+                    onChange={e => setProfileForm({...profileForm, phone: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+              </div>
+              <div className="md:col-span-2 pt-4">
+                <Button type="submit" loading={loading} variant="primary" className="w-full py-4">
+                  Update Identity
+                </Button>
+              </div>
+            </form>
+          </section>
 
-      {/* ── Security ── */}
-      {activeTab === 'security' && (
-        <div className="space-y-6">
-          <div className="bg-surface-container-high border border-white/5 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Shield className="w-5 h-5 text-primary-fixed" />
-              <h3 className="font-headline font-black uppercase text-sm text-gray-300">Security Settings</h3>
+          <section className="bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-md">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-primary-fixed/10 rounded-2xl text-primary-fixed">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-black font-headline uppercase text-white">Security Protocol</h2>
             </div>
-            <ToggleRow label="Two-Factor Authentication" sub="Add extra security to your account" checked={true} onChange={() => {}} />
-            <ToggleRow label="Session Timeout (30 min)"  sub="Auto-logout after inactivity"       checked={true} onChange={() => {}} />
-            <div className="pt-2">
-              <button
-                onClick={() => showMsg('success', 'Password reset link sent to your email.')}
-                className="flex items-center gap-2 px-5 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-headline font-bold uppercase hover:bg-white/10 transition-colors"
-              >
-                <Lock className="w-4 h-4" /> Change Password
-              </button>
-            </div>
-          </div>
 
-          {/* Danger zone */}
-          <div className="bg-error/5 border border-error/20 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-5 h-5 text-error" />
-              <h3 className="font-headline font-black uppercase text-sm text-error">Danger Zone</h3>
+            <form onSubmit={handlePasswordChange} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Current Password</label>
+                  <input 
+                    type="password" value={passwordForm.current_password} 
+                    onChange={e => setPasswordForm({...passwordForm, current_password: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">New Password</label>
+                  <input 
+                    type="password" value={passwordForm.new_password} 
+                    onChange={e => setPasswordForm({...passwordForm, new_password: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Confirm New Password</label>
+                  <input 
+                    type="password" value={passwordForm.password_confirmation} 
+                    onChange={e => setPasswordForm({...passwordForm, password_confirmation: e.target.value})}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-primary-fixed outline-none transition-all"
+                  />
+                </div>
+              </div>
+              <Button type="submit" loading={loading} variant="outline" className="w-full py-4">
+                Reset Access Key
+              </Button>
+            </form>
+          </section>
+        </motion.div>
+
+        {/* COLUMN 2: PREFERENCES & DANGER */}
+        <div className="space-y-8">
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+            className="bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-md"
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-primary-fixed/10 rounded-2xl text-primary-fixed">
+                <Bell className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-black font-headline uppercase text-white">Preferences</h2>
             </div>
-            <p className="text-sm text-gray-500 mb-5">Destructive actions that cannot be undone.</p>
-            <button
-              onClick={handleDangerDelete}
-              className="px-5 py-3 bg-error/10 text-error border border-error/30 rounded-xl text-sm font-headline font-black uppercase hover:bg-error/20 transition-colors"
-            >
-              Delete All Data
-            </button>
-          </div>
+
+            <form onSubmit={handlePrefsUpdate} className="space-y-6">
+              {[
+                { key: 'emailNotifications', label: 'Email Alerts', sub: 'Critical system updates via email' },
+                { key: 'pushNotifications', label: 'Push Notifications', sub: 'Instant browser notifications' },
+                { key: 'systemUpdates', label: 'Automatic Updates', sub: 'Sync preferences on all devices' },
+              ].map(pref => (
+                <div key={pref.key} className="flex items-center justify-between p-4 bg-black/40 border border-white/5 rounded-2xl">
+                  <div>
+                    <p className="text-sm font-bold text-white uppercase">{pref.label}</p>
+                    <p className="text-[10px] text-gray-500 uppercase">{pref.sub}</p>
+                  </div>
+                  <input 
+                    type="checkbox" checked={prefsForm[pref.key]} 
+                    onChange={e => setPrefsForm({...prefsForm, [pref.key]: e.target.checked})}
+                    className="w-5 h-5 accent-primary-fixed bg-transparent border-white/20 rounded"
+                  />
+                </div>
+              ))}
+              <Button type="submit" loading={loading} variant="ghost" className="w-full py-3">
+                Save Preferences
+              </Button>
+            </form>
+          </motion.section>
+
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+            className="bg-error/5 border border-error/20 rounded-3xl p-8 backdrop-blur-md"
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-error/10 rounded-2xl text-error">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-black font-headline uppercase text-error">Danger Zone</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-black/40 border border-white/5 rounded-2xl">
+                <p className="text-xs text-gray-400 leading-relaxed mb-4">
+                  Permanently erase this administrator account and all associated security tokens.
+                </p>
+                <Button variant="danger" className="w-full py-3 text-[10px]">
+                  Delete My Account
+                </Button>
+              </div>
+              <div className="p-4 bg-black/40 border border-white/5 rounded-2xl">
+                <p className="text-xs text-gray-400 leading-relaxed mb-4">
+                  Wipe all member and financial data from the global database.
+                </p>
+                <Button variant="danger" className="w-full py-3 text-[10px]">
+                  System Hard Reset
+                </Button>
+              </div>
+            </div>
+          </motion.section>
         </div>
-      )}
-
-      {/* ── Notifications ── */}
-      {activeTab === 'notifications' && (
-        <div className="bg-surface-container-high border border-white/5 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center gap-3 mb-2">
-            <Bell className="w-5 h-5 text-primary-fixed" />
-            <h3 className="font-headline font-black uppercase text-sm text-gray-300">Notification Preferences</h3>
-          </div>
-          <ToggleRow label="Email Notifications" sub="Receive updates via email"             checked={form.emailNotifications} onChange={() => toggle('emailNotifications')} />
-          <ToggleRow label="Push Notifications"  sub="Browser push notifications"            checked={form.pushNotifications}  onChange={() => toggle('pushNotifications')} />
-          <ToggleRow label="New Member Alerts"   sub="Notify when members join"              checked={form.memberAlerts}        onChange={() => toggle('memberAlerts')} />
-          <ToggleRow label="Order Alerts"        sub="Notify on new orders"                  checked={form.orderAlerts}         onChange={() => toggle('orderAlerts')} />
-          <ToggleRow label="System Updates"      sub="Platform feature announcements"        checked={form.systemUpdates}       onChange={() => toggle('systemUpdates')} />
-          <div className="pt-2">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-3 bg-primary-fixed text-black rounded-xl font-headline font-black uppercase text-sm hover:scale-[1.02] transition-transform disabled:opacity-60 flex items-center gap-2"
-            >
-              {saving ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-              Save Preferences
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
-
-/* ── shared sub-components ── */
-const ToggleRow = ({ label, sub, checked, onChange }) => (
-  <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-    <div>
-      <p className="text-sm font-headline font-bold text-white">{label}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{sub}</p>
-    </div>
-    <Toggle checked={checked} onChange={onChange} />
-  </div>
-);
-
-const SaveBar = ({ onSave, onDiscard, saving }) => (
-  <div className="flex gap-3 pt-2">
-    <button
-      type="button" onClick={onDiscard}
-      className="px-5 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-headline font-bold uppercase hover:bg-white/10 transition-colors"
-    >
-      Discard
-    </button>
-    <button
-      type="submit" disabled={saving}
-      className="px-6 py-3 bg-primary-fixed text-black rounded-xl text-sm font-headline font-black uppercase hover:scale-[1.02] transition-transform disabled:opacity-60 flex items-center gap-2"
-    >
-      {saving ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-      Save Changes
-    </button>
-  </div>
-);
 
 export default AdminSettings;

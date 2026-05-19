@@ -26,20 +26,33 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Public routes
+// ============================================================================
+// 1. PUBLIC ROUTES (No Auth Required)
+// ============================================================================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/plans', [PlanController::class, 'index']);
+Route::get('/plans/{plan}', [PlanController::class, 'show']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{product}', [ProductController::class, 'show']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/workouts', [WorkoutController::class, 'index']);
+Route::get('/workouts/{workout}', [WorkoutController::class, 'show']);
+Route::get('/programs', [ProgramController::class, 'index']);
+Route::get('/programs/{program}', [ProgramController::class, 'show']);
+Route::get('/exercises', [ExerciseController::class, 'index']);
+Route::get('/coaches', [CoachController::class, 'index']);
+Route::get('/coaches/{coach}', [CoachController::class, 'show']);
 
-
-// Authenticated routes
+// ============================================================================
+// 2. AUTHENTICATED ROUTES (Token Required)
+// ============================================================================
 Route::middleware('auth:sanctum')->group(function() {
     
-    // Auth
+    // Auth & Profile
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-
-    // Profile
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'show']);
         Route::put('/', [ProfileController::class, 'update']);
@@ -47,25 +60,13 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/settings', [ProfileController::class, 'updateSettings']);
         Route::delete('/', [ProfileController::class, 'destroy']);
     });
-        // plans and workouts view routes
-    Route::get('/plans', [PlanController::class, 'index']);
-    Route::get('/plans/{plan}', [PlanController::class, 'show']);
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::get('/products/{product}', [ProductController::class, 'show']);
-    Route::get('/categories', [CategoryController::class, 'index']);
 
-    // Public data routes (no auth required for viewing)
-    Route::get('/workouts', [WorkoutController::class, 'index']);
-    Route::get('/workouts/{workout}', [WorkoutController::class, 'show']);
-    Route::get('/programs', [ProgramController::class, 'index']);
-    Route::get('/programs/{program}', [ProgramController::class, 'show']);
-    Route::get('/exercises', [ExerciseController::class, 'index']);
-    Route::get('/coaches', [CoachController::class, 'index']);
-    Route::get('/coaches/{coach}', [CoachController::class, 'show']);
+    // CLIENT MEMBERSHIP ACTION
+    // This allows clients to request a plan. 
+    // We move this OUT of the Admin group so clients can actually use it.
+    Route::post('/memberships', [MembershipController::class, 'store']);
+    Route::get('/memberships/me', [MembershipController::class, 'me']); 
 
-
-    // Memberships
-    Route::apiResource('memberships', MembershipController::class);
 
     // Attendance
     Route::prefix('attendance')->group(function(){
@@ -81,9 +82,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
 
-    // ========== CLIENT FEATURES ==========
-    
-    // User Workouts
+    // Client Features
     Route::prefix('user-workouts')->group(function() {
         Route::get('/', [UserWorkoutController::class, 'index']);
         Route::post('/start', [UserWorkoutController::class, 'start']);
@@ -92,7 +91,6 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::get('/statistics', [UserWorkoutController::class, 'statistics']);
     });
 
-    // User Programs (FIX: This was missing!)
     Route::prefix('user-programs')->group(function() {
         Route::get('/', [UserProgramController::class, 'index']);
         Route::get('/active', [UserProgramController::class, 'active']);
@@ -101,7 +99,6 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::post('/{id}/complete', [UserProgramController::class, 'complete']);
     });
 
-    // Nutrition (FIX: This was missing!)
     Route::prefix('nutrition')->group(function() {
         Route::get('/', [NutritionController::class, 'index']);
         Route::get('/{date}', [NutritionController::class, 'show']);
@@ -111,20 +108,19 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::delete('/meals/{id}', [NutritionController::class, 'deleteMeal']);
     });
 
-    // Coach
     Route::prefix('coach')->group(function() {
         Route::get('/my-coach', [CoachController::class, 'myCoach']);
         Route::post('/assign', [CoachController::class, 'assignCoach']);
     });
 
-    // Admin only routes
+    // ============================================================================
+    // 3. ADMIN ONLY ROUTES
+    // ============================================================================
     Route::middleware('role:admin')->group(function(){
         
-        // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/dashboard/trends', [DashboardController::class, 'trends']);
 
-        // User Management
         Route::apiResource('users', UserController::class);
         Route::get('/members', [UserController::class, 'index']);
         Route::get('/members/{user}', [UserController::class, 'show']);
@@ -134,51 +130,46 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/plans/{plan}', [PlanController::class, 'update']);
         Route::delete('/plans/{plan}', [PlanController::class, 'destroy']);
 
-        // Membership Management
-        Route::post('/memberships', [MembershipController::class, 'store']);
+        // Membership Management (ADMIN SIDE)
+        Route::get('/memberships/pending', [MembershipController::class, 'pending']);
+
+        Route::get('/memberships', [MembershipController::class, 'index']);
+        Route::get('/memberships/{membership}', [MembershipController::class, 'show']);
         Route::put('/memberships/{membership}', [MembershipController::class, 'update']);
         Route::delete('/memberships/{membership}', [MembershipController::class, 'destroy']);
+        
 
-        // Attendance Management
         Route::get('/attendance', [AttendanceController::class, 'index']);
         Route::get('/attendance/active', [AttendanceController::class, 'active']);
 
-        // Product Management
         Route::post('/products', [ProductController::class, 'store']);
         Route::put('/products/{product}', [ProductController::class, 'update']);
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
         Route::put('/products/{product}/stock', [ProductController::class, 'updateStock']);
 
-        // schedules management
         Route::apiResource('schedules', ScheduleController::class);
 
-        // Category Management
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 
-        // Workout Management
         Route::post('/workouts', [WorkoutController::class, 'store']);
         Route::put('/workouts/{workout}', [WorkoutController::class, 'update']);
         Route::delete('/workouts/{workout}', [WorkoutController::class, 'destroy']);
 
-        // Exercise Management
         Route::post('/exercises', [ExerciseController::class, 'store']);
         Route::put('/exercises/{exercise}', [ExerciseController::class, 'update']);
         Route::delete('/exercises/{exercise}', [ExerciseController::class, 'destroy']);
 
-        // Program Management
         Route::post('/programs', [ProgramController::class, 'store']);
         Route::put('/programs/{program}', [ProgramController::class, 'update']);
         Route::delete('/programs/{program}', [ProgramController::class, 'destroy']);
 
-        // Coach Management
         Route::post('/coaches', [CoachController::class, 'store']);
         Route::put('/coaches/{coach}', [CoachController::class, 'update']);
     });
 });
 
-// Test route
 Route::get('/test', function() {
     return response()->json(['message' => 'API is working!']);
 });

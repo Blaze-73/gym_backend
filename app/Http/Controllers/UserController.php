@@ -50,6 +50,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,client',
+            'phone' => 'nullable|string|max:20', // Added phone here for creation
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -94,6 +95,7 @@ class UserController extends Controller
             'email' => ['sometimes', 'email', Rule::unique('users')->ignore($user->id)],
             'role' => 'sometimes|in:admin,client',
             'password' => 'sometimes|string|min:8',
+            'phone' => 'sometimes|string|max:20', // ✅ ADDED: Now phone can be updated
         ]);
 
         if (isset($validated['password'])) {

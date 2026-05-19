@@ -21,19 +21,20 @@ class UserProgramController extends Controller
     }
 
     public function active()
-    {
-        $user = Auth::user();
-        $program = UserProgram::with('program.workouts')
-            ->where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+{
+    // Find the program for the user that is currently marked as 'active'
+    $program = \App\Models\UserProgram::where('user_id', auth()->id())
+        ->where('status', 'active')
+        ->with('program')
+        ->first();
 
-        if (!$program) {
-            return response()->json(['message' => 'No active program'], 404);
-        }
-
-        return response()->json($program);
+    if (!$program) {
+        return response()->json(['message' => 'No active program found'], 404);
     }
+
+    return response()->json($program);
+}
+
 
     public function enroll(Request $request)
     {

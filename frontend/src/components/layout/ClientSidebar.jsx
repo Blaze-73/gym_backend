@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Dumbbell, Utensils, Users,
-  Settings, LogOut, Menu, X, ShoppingBag, ShoppingCart,
+  Settings, LogOut, Menu, X, ShoppingBag, ShoppingCart, Package,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { icon: Utensils,        label: 'Nutrition',  path: '/nutrition' },
   { icon: Users,           label: 'Coaches',    path: '/coaches'   },
   { icon: ShoppingBag,     label: 'Store',      path: '/store'     },
+  { icon: Package,         label: 'Membership Plans', path: '/plans' },
   { icon: Settings,        label: 'Settings',   path: '/settings'  },
 ];
 

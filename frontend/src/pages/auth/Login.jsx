@@ -15,147 +15,132 @@ const Login = () => {
     password: '',
   });
 
-      const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    // 1. Call the login function from context
-    const responseData = await login(formData);
-    
-    // 2. Get the saved redirect path from the interceptor
-    const redirectPath = localStorage.getItem('redirectPath');
-    localStorage.removeItem('redirectPath');
+    try {
+      const responseData = await login(formData);
+      const redirectPath = localStorage.getItem('redirectPath');
+      localStorage.removeItem('redirectPath');
 
-    // 3. Check role and navigate
-    if (responseData.user?.role === 'admin') {
-      navigate(redirectPath || '/admin');
-    } else {
-      navigate(redirectPath || '/dashboard');
+      if (responseData.user?.role === 'admin') {
+        navigate(redirectPath || '/admin');
+      } else {
+        navigate(redirectPath || '/dashboard');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Login Error:", err);
-    setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="relative min-h-screen w-full flex items-center justify-center px-4 overflow-hidden">
+      {/* CINEMATIC BACKGROUND */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&q=80" 
+          className="w-full h-full object-cover scale-105"
+          alt="Gym Background"
+        />
+        {/* Gradient Overlay: Creates the "Deep" look and ensures text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-primary-fixed/10" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
       >
-        {/* Logo */}
+        {/* LOGO AREA */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h1 className="text-4xl font-black font-headline text-white tracking-widest">ALIEN</h1>
+            <h1 className="text-5xl font-black font-headline text-white tracking-widest italic">
+              ALIEN <span className="text-primary-fixed">FITNESS</span>
+            </h1>
           </Link>
-          <p className="text-gray-500 mt-2 text-sm uppercase tracking-wider">Performance System</p>
+          <div className="h-1 w-12 bg-primary-fixed mx-auto mt-4 rounded-full" />
+          <p className="text-gray-400 mt-4 text-xs uppercase tracking-[0.3em] font-bold">
+            Access the Command Center
+          </p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-surface-container-high border border-white/5 rounded-2xl p-8">
+        {/* GLASSMORPHISM FORM CARD */}
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl">
           <div className="mb-8">
-            <h2 className="text-2xl font-black font-headline text-white uppercase">Welcome Back</h2>
-            <p className="text-gray-400 mt-2 text-sm">Enter your credentials to access your account</p>
+            <h2 className="text-2xl font-black font-headline text-white uppercase italic">Welcome Back</h2>
+            <p className="text-gray-400 mt-2 text-sm">Authenticate your identity to proceed</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-xl">
-              <p className="text-error text-sm">{error}</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              className="mb-6 p-4 bg-error/20 border border-error/30 rounded-xl text-error text-sm font-bold uppercase tracking-wider text-center"
+            >
+              {error}
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-headline text-gray-500 uppercase tracking-wider mb-2">
-                Email Address
-              </label>
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="athlete@alien.com"
-                  className="w-full bg-surface-container-highest border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-fixed/50 transition-colors"
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-fixed/50 transition-all"
                   required
                 />
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-headline text-gray-500 uppercase tracking-wider mb-2">
-                Password
-              </label>
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Access Key</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="••••••••"
-                  className="w-full bg-surface-container-highest border border-white/10 rounded-xl pl-12 pr-12 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-fixed/50 transition-colors"
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-3.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary-fixed/50 transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-fixed transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-primary-fixed text-on-primary-fixed font-headline font-bold uppercase tracking-wider rounded-xl hover:bg-primary-fixed/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-primary-fixed text-black font-headline font-black uppercase tracking-widest rounded-2xl hover:bg-primary-fixed/90 transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(218,249,0,0.3)]"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Authenticating...' : 'Sign In'}
             </motion.button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-4">
-            <div className="flex-1 h-px bg-white/10"></div>
-            <span className="text-xs text-gray-500 uppercase">OR</span>
-            <div className="flex-1 h-px bg-white/10"></div>
-          </div>
-
-          {/* Register Link */}
-          <p className="text-center text-gray-400 text-sm">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-fixed hover:underline font-headline font-bold">
-              Create Account
-            </Link>
-          </p>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-8 p-4 bg-surface-container-highest/50 border border-white/5 rounded-xl">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 text-center">Demo Credentials</p>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Admin:</span>
-              <span className="text-gray-500">admin@gym.com / 123123</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Client:</span>
-              <span className="text-gray-500">oualid@gym.com / oualid123</span>
-            </div>
+          <div className="mt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              New to the system?{' '}
+              <Link to="/register" className="text-primary-fixed hover:underline font-headline font-bold uppercase tracking-tighter">
+                Create Account
+              </Link>
+            </p>
           </div>
         </div>
       </motion.div>

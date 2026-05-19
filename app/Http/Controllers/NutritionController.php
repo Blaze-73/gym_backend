@@ -24,20 +24,42 @@ class NutritionController extends Controller
         return response()->json($logs);
     }
 
-    public function show($date)
-    {
-        $user = Auth::user();
-        $log = NutritionLog::with('meals')
-            ->where('user_id', $user->id)
-            ->where('log_date', $date)
-            ->first();
+   public function show($date)
+        {
+            // Find nutrition logs for the authenticated user on the specific date provided in the URL
+            $logs = \App\Models\NutritionLog::where('user_id', auth()->id())
+                ->whereDate('log_date', $date)
+                ->get();
 
-        if (!$log) {
-            return response()->json(['message' => 'No nutrition log for this date'], 404);
+            // Calculate totals for that day
+            $totals = [
+                'calories' => $logs->sum('calories'),
+                'protein_g' => $logs->sum('protein_g'),
+                'carbs_g' => $logs->sum('carbs_g'),
+                'fats_g' => $logs->sum('fats_g'),
+                'water_ml' => \App\Models\NutritionLog::where('user_id', auth()->id())
+                    ->whereDate('log_date', $date)
+                    ->value('water_ml') ?? 0,
+            ];
+
+            // These are default targets if the user hasn't set any
+            $response = [
+                'meals' => $logs,
+                'calories' => $totals['calories'],
+                'protein_g' => $totals['protein_g'],
+                'carbs_g' => $totals['carbs_g'],
+                'fats_g' => $totals['fats_g'],
+                'water_ml' => $totals['water_ml'],
+                'target_calories' => 2500,
+                'target_protein_g' => 180,
+                'target_carbs_g' => 300,
+                'target_fats_g' => 80,
+                'target_water_ml' => 3000,
+            ];
+
+            return response()->json($response);
         }
 
-        return response()->json($log);
-    }
 
     public function store(Request $request)
     {
